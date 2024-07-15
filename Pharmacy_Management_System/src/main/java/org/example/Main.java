@@ -2,7 +2,10 @@ package org.example;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
+import java.util.Date;
 import java.util.*;
+import java.sql.*;
 
 public class Main {
     private static Scanner scanner = new Scanner(System.in);
@@ -325,50 +328,79 @@ public class Main {
     }
 
     private static void loadInitialData() {
-        // Load initial data from the database if needed
+        loadDrugData();
+        loadCustomerData();
+        loadCartData();
+    }
+
+    private static void loadDrugData() {
+        String query = "SELECT * FROM Drugs";
+        ResultSet resultSet = dbHandler.executeSelectQuery(query);
+
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Drug[] drugs = {
-                    new Drug(1001, "Aspirin", "PharmaCorp", sdf.parse("2025-12-31"), 100, 5.99),
-                    new Drug(1002, "Ibuprofen", "HealthPlus", sdf.parse("2026-11-30"), 200, 10.99),
-                    new Drug(1003, "Paracetamol", "MediLife", sdf.parse("2025-10-15"), 150, 3.99),
-                    new Drug(1004, "Amoxicillin", "Antibiotix", sdf.parse("2025-09-20"), 75, 15.49),
-                    new Drug(1005, "Ciprofloxacin", "BioPharma", sdf.parse("2026-01-25"), 80, 12.89),
-                    new Drug(1006, "Lisinopril", "HeartCare", sdf.parse("2025-08-30"), 60, 8.75),
-                    new Drug(1007, "Metformin", "Diabeat", sdf.parse("2025-07-14"), 90, 4.50),
-                    new Drug(1008, "Omeprazole", "StomachEase", sdf.parse("2025-11-25"), 120, 7.20),
-                    new Drug(1009, "Atorvastatin", "CholestrolFix", sdf.parse("2025-12-01"), 110, 9.30),
-                    new Drug(1010, "Levothyroxine", "ThyroMed", sdf.parse("2026-02-14"), 100, 6.40),
-                    new Drug(1011, "Amlodipine", "CardioSafe", sdf.parse("2025-06-20"), 95, 5.10),
-                    new Drug(1012, "Simvastatin", "LipControl", sdf.parse("2026-03-10"), 85, 6.90),
-                    new Drug(1013, "Clopidogrel", "BloodThinner", sdf.parse("2025-08-22"), 70, 11.00),
-                    new Drug(1014, "Losartan", "HyperTensionRelief", sdf.parse("2025-09-14"), 65, 7.75),
-                    new Drug(1015, "Gabapentin", "NerveRelief", sdf.parse("2025-10-05"), 130, 14.20),
-                    new Drug(1016, "ExpiredDrug1", "ExpiredMeds", sdf.parse("2023-12-31"), 50, 5.50),
-                    new Drug(1017, "ExpiredDrug2", "OldPharma", sdf.parse("2022-11-30"), 40, 6.60),
-                    new Drug(1018, "ExpiredDrug3", "PastMeds", sdf.parse("2021-10-15"), 30, 7.70),
-                    new Drug(1019, "ExpiredDrug4", "OutdatedPharma", sdf.parse("2022-09-20"), 25, 8.80),
-                    new Drug(1020, "ExpiredDrug5", "OldStock", sdf.parse("2023-01-25"), 20, 9.90),
-                    new Drug(1021, "Doxycycline", "Antibiotix", sdf.parse("2025-12-31"), 100, 13.45),
-                    new Drug(1022, "Metoprolol", "HeartCare", sdf.parse("2025-11-30"), 200, 10.75),
-                    new Drug(1023, "Albuterol", "BreathEasy", sdf.parse("2026-10-15"), 150, 12.00),
-                    new Drug(1024, "Pantoprazole", "GastroCare", sdf.parse("2025-09-20"), 75, 14.55),
-                    new Drug(1025, "Zolpidem", "SleepWell", sdf.parse("2025-01-25"), 80, 8.25)
-            };
-            for (Drug drug : drugs) {
+            while (resultSet.next()) {
+                int drugId = resultSet.getInt("drug_id");
+                String drugName = resultSet.getString("drug_name");
+                String manufacturer = resultSet.getString("manufacturer");
+                Date expiryDate = resultSet.getDate("expiry_date");
+                int quantity = resultSet.getInt("quantity");
+                double price = resultSet.getDouble("price");
+
+                Drug drug = new Drug(drugId, drugName, manufacturer, expiryDate, quantity, price);
                 drugList.add(drug);
             }
+            System.out.println("Initial drug data loaded successfully!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-            Customer[] initialCustomers = {
-                    new Customer("ankushgupta1806@gmail.com","Ankush Gupta","A-1201","7202906881"),
-                    new Customer("veer@gmail.com","Veer","A-1204","1234567890")
-            };
-            for(Customer customer : initialCustomers){
+    private static void loadCustomerData() {
+        String query = "SELECT * FROM Customers";
+        ResultSet resultSet = dbHandler.executeSelectQuery(query);
+
+        try {
+            while (resultSet.next()) {
+                String email = resultSet.getString("email");
+                String name = resultSet.getString("name");
+                String address = resultSet.getString("address");
+                String phoneNumber = resultSet.getString("phone_number");
+
+                Customer customer = new Customer(email, name, address, phoneNumber);
                 customerList.add(customer);
             }
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
+            System.out.println("Initial customer data loaded successfully!");
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-
     }
+
+    private static void loadCartData() {
+        String query = "SELECT * FROM Cart";
+        ResultSet resultSet = dbHandler.executeSelectQuery(query);
+
+        try {
+            while (resultSet.next()) {
+                int cartId = resultSet.getInt("cart_id");
+                String email = resultSet.getString("email");
+                int drugId = resultSet.getInt("drug_id");
+                int quantity = resultSet.getInt("quantity");
+
+                Drug drug = findDrugById(drugId);
+                if (drug != null) {
+                    CartItem cartItem = new CartItem(drug, quantity);
+                    Cart cart = findCartByEmail(email);
+                    if (cart == null) {
+                        cart = new Cart(cartId, email);
+                        cartList.add(cart);
+                    }
+                    cart.addToCart(cartItem);
+                }
+            }
+            System.out.println("Initial cart data loaded successfully!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
