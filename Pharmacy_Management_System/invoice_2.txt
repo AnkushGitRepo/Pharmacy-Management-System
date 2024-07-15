@@ -1,0 +1,6 @@
+Invoice
+Order ID: 2
+Customer Email: veer@gmail.com
+Order Date: 2024-07-14
+
+Drug ID    Drug Name            Manufacturer    Quantity   Price     
