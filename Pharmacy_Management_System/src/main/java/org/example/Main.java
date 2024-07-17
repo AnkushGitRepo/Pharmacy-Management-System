@@ -2,9 +2,8 @@ package org.example;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
 import java.util.Date;
-import java.util.*;
+import java.util.Scanner;
 import java.sql.*;
 
 public class Main {
@@ -26,28 +25,28 @@ public class Main {
 
             switch (choice) {
                 case 1:
-                    addDrug(); //Use to add drug details to drugs table(DBMS) and drugList(DSA)
+                    addDrug(); // Use to add drug details to drugs table (DBMS) and drugList (DSA)
                     break;
                 case 2:
-                    updateDrug();   //Use to update details of drug in drugs table(DBMS) and drugList(DSA)
+                    updateDrug(); // Use to update details of drug in drugs table (DBMS) and drugList (DSA)
                     break;
                 case 3:
-                    deleteDrug(); // Delete drug from drugList and drugs table.
+                    deleteDrug(); // Delete drug from drugList and drugs table
                     break;
                 case 4:
-                    viewDrugInventory(); // Use to print the list of all drugs on terminal.
+                    viewDrugInventory(); // Use to print the list of all drugs on terminal
                     break;
                 case 5:
-                    listExpiredDrugs(); // Print all the expired drug on terminal
+                    listExpiredDrugs(); // Print all the expired drugs on terminal
                     break;
                 case 6:
-                    registerCustomer(); // Use to resister new customer using their email id as primary key.
+                    registerCustomer(); // Use to register new customer using their email ID as primary key
                     break;
                 case 7:
-                    deleteCustomer(); // Use to delete customer by passing their registered email id.
+                    deleteCustomer(); // Use to delete customer by passing their registered email ID
                     break;
                 case 8:
-                    manageCart(); // Use to login into cart session where admin can add drugs to cart, generate invoice for purchase.
+                    manageCart(); // Use to log in to cart session where admin can add drugs to cart, generate invoice for purchase
                     break;
                 case 9:
                     System.out.println("Exiting...");
@@ -284,20 +283,41 @@ public class Main {
     }
 
     private static void checkout(Cart cart) {
-        // Calculate total amount
-        double totalAmount = 0;
-        for (CartItem item : cart.getItems()) {
-            totalAmount += item.getDrug().getPrice() * item.getQuantity();
+        if (cart.getItems().isEmpty()) {
+            System.out.println("Cart is empty. Cannot checkout.");
+            return;
         }
 
-        // Generate order
-        Order order = new Order(cartIdCounter++, cart.getEmail(), new Date(), totalAmount);
-        order.generateInvoice();
-        order.saveOrder();
+        double totalAmount = calculateTotalAmount(cart);
 
-        // Clear cart
-        cart.getItems().clear();
-        System.out.println("Checkout successful! Invoice generated.");
+        if (totalAmount == 0) {
+            System.out.println("Total amount is zero. Cannot checkout.");
+            return;
+        }
+
+        Order order = new Order(cart.getCartId(), cart.getEmail(), new Date(), totalAmount, cart.getItems());
+
+        try {
+            order.saveOrder();
+            order.generateInvoice();
+
+            cart.getItems().clear();
+            System.out.println("Checkout successful! Invoice generated.");
+        } catch (Exception e) {
+            System.out.println("Error during checkout: " + e.getMessage());
+        }
+    }
+
+    private static double calculateTotalAmount(Cart cart) {
+        double totalAmount = 0;
+        for (CartItem item : cart.getItems()) {
+            if (item.getDrug() != null && item.getQuantity() > 0) {
+                totalAmount += item.getQuantity() * item.getDrug().getPrice();
+            } else {
+                System.out.println("Invalid item in cart: " + item);
+            }
+        }
+        return totalAmount;
     }
 
     private static Drug findDrugById(int drugId) {
@@ -402,5 +422,4 @@ public class Main {
             e.printStackTrace();
         }
     }
-
 }
