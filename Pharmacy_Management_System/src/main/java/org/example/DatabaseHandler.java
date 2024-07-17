@@ -11,17 +11,18 @@ public class DatabaseHandler {
 
     public void connect() {
         try {
-            // Register the PostgreSQL JDBC driver
-            Class.forName("org.postgresql.Driver");
-            connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/pharmacy", "postgres", "1806"); // Use your pgAdmin account password
-            System.out.println("Database connected successfully!");
-        } catch (ClassNotFoundException e) {
-            System.err.println("PostgreSQL JDBC Driver not found.");
-            e.printStackTrace();
+            String url = "jdbc:postgresql://localhost:5432/pharmacy";
+            String user = "postgres";  // Replace with your database username
+            String password = "1806";  // Replace with your database password
+
+            connection = DriverManager.getConnection(url, user, password);
+            System.out.println("Connection to the database established successfully.");
         } catch (SQLException e) {
+            System.out.println("Error connecting to the database: " + e.getMessage());
             e.printStackTrace();
         }
     }
+
 
     public void executeQuery(String query) {
         try {
