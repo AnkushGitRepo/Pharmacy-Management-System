@@ -1,6 +1,7 @@
 package org.example;
 
-import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -13,19 +14,12 @@ public class Order {
     private double totalAmount;
     private LinkedList<CartItem> items;
 
-    public Order(int orderId, String email, Date orderDate, double totalAmount) {
-        this.orderId = orderId;
-        this.email = email;
-        this.orderDate = orderDate;
-        this.totalAmount = totalAmount;
-    }
-
     public Order(int orderId, String email, Date orderDate, double totalAmount, LinkedList<CartItem> items) {
         this.orderId = orderId;
         this.email = email;
         this.orderDate = orderDate;
         this.totalAmount = totalAmount;
-        this.items = items;
+        this.items = items != null ? items : new LinkedList<>();
     }
 
     // Getters and Setters
@@ -62,6 +56,14 @@ public class Order {
         this.totalAmount = totalAmount;
     }
 
+    public LinkedList<CartItem> getItems() {
+        return items;
+    }
+
+    public void setItems(LinkedList<CartItem> items) {
+        this.items = items;
+    }
+
     public void generateInvoice() {
         String filePath = "invoice_" + orderId + ".txt";
 
@@ -89,12 +91,11 @@ public class Order {
             System.out.println("Invoice generated: " + filePath);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error generating invoice: " + e.getMessage());
         }
     }
 
-
-    public void saveOrder() {
+    public void saveOrder() throws SQLException {
         Connection connection = null;
         PreparedStatement orderStatement = null;
         PreparedStatement itemStatement = null;
@@ -129,14 +130,14 @@ public class Order {
             System.out.println("Order saved successfully!");
 
         } catch (SQLException e) {
-            e.printStackTrace();
             if (connection != null) {
                 try {
                     connection.rollback(); // Rollback transaction on error
                 } catch (SQLException ex) {
-                    ex.printStackTrace();
+                    System.out.println("Error rolling back transaction: " + ex.getMessage());
                 }
             }
+            throw e;
         } finally {
             // Close resources
             try {
@@ -144,7 +145,7 @@ public class Order {
                 if (itemStatement != null) itemStatement.close();
                 if (connection != null) connection.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                System.out.println("Error closing resources: " + e.getMessage());
             }
         }
     }
@@ -154,3 +155,4 @@ public class Order {
         return "Order [orderId=" + orderId + ", email=" + email + ", orderDate=" + orderDate + ", totalAmount=" + totalAmount + "]";
     }
 }
+
