@@ -42,41 +42,75 @@ public class Cart {
     }
 
     public void addToCart(CartItem item) {
-        this.items.add(item);
+        if (item != null && item.getQuantity() > 0 && item.getDrug() != null) {
+            this.items.add(item);
+        } else {
+            System.out.println("Invalid cart item.");
+        }
     }
 
     public void removeFromCart(CartItem item) {
-        this.items.remove(item);
+        if (this.items.contains(item)) {
+            this.items.remove(item);
+        } else {
+            System.out.println("Item not found in cart.");
+        }
     }
 
     public void viewCart() {
-        for (CartItem item : items) {
-            System.out.println(item);
+        if (items.isEmpty()) {
+            System.out.println("Cart is empty.");
+        } else {
+            for (CartItem item : items) {
+                System.out.println(item);
+            }
         }
     }
+
 
     public void checkout() {
-        // Calculate total amount
-        double totalAmount = 0;
-        for (CartItem item : items) {
-            totalAmount += item.getQuantity() * item.getDrug().getPrice();
+        if (items.isEmpty()) {
+            System.out.println("Cart is empty. Cannot checkout.");
+            return;
         }
 
-        // Create Order object
-        int orderId = cartId; // Assuming order ID is the same as cart ID
-        Date orderDate = new Date();
-        Order order = new Order(orderId, email, orderDate, totalAmount, items);
+        double totalAmount = calculateTotalAmount();
 
-        // Save order to the database
-        order.saveOrder();
+        if (totalAmount == 0) {
+            System.out.println("Total amount is zero. Cannot checkout.");
+            return;
+        }
 
-        // Generate invoice
-        order.generateInvoice();
+        Order order = new Order(cartId, email, new Date(), totalAmount, items);
+
+        try {
+            order.saveOrder();
+            order.generateInvoice();
+
+            items.clear();
+            System.out.println("Checkout successful! Invoice generated.");
+        } catch (Exception e) {
+            System.out.println("Error during checkout: " + e.getMessage());
+        }
     }
 
+
+
+    private double calculateTotalAmount() {
+        double totalAmount = 0;
+        for (CartItem item : items) {
+            if (item.getDrug() != null && item.getQuantity() > 0) {
+                totalAmount += item.getQuantity() * item.getDrug().getPrice();
+            } else {
+                System.out.println("Invalid item in cart: " + item);
+            }
+        }
+        return totalAmount;
+    }
 
     @Override
     public String toString() {
         return "Cart [cartId=" + cartId + ", email=" + email + ", items=" + items + "]";
     }
 }
+
