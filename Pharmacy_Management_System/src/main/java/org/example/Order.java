@@ -105,7 +105,7 @@ public class Order {
 
         try {
             // Establish database connection
-            connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/pharmacy", "username", "password");
+            connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/pharmacy", "postgres", "1806");
             connection.setAutoCommit(false); // Enable transaction
 
             // Insert order details
