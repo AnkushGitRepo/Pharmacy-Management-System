@@ -102,3 +102,43 @@ CREATE TABLE Drugs (
     description TEXT,
     tags VARCHAR(255)
 );
+
+
+
+CREATE TABLE Customers (
+    email VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL CHECK (name !~ '[0-9]'),
+    address VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(15) NOT NULL
+);
+
+
+CREATE TABLE Cart (
+    cart_id SERIAL PRIMARY KEY,
+    email VARCHAR(255),
+    drug_id INT,
+    quantity INT NOT NULL,
+    FOREIGN KEY (email) REFERENCES Customers(email),
+    FOREIGN KEY (drug_id) REFERENCES Drugs(drug_id),
+    UNIQUE (email, drug_id)
+);
+
+
+CREATE TABLE Orders (
+    order_id SERIAL PRIMARY KEY,
+    email VARCHAR(255),
+    order_date DATE NOT NULL,
+    total_amount DOUBLE PRECISION NOT NULL,
+    FOREIGN KEY (email) REFERENCES Customers(email)
+);
+
+CREATE TABLE CartItems (
+    cart_item_id SERIAL PRIMARY KEY,
+    cart_id INT,
+    drug_id INT,
+    quantity INT NOT NULL,
+    FOREIGN KEY (cart_id) REFERENCES Cart(cart_id),
+    FOREIGN KEY (drug_id) REFERENCES Drugs(drug_id)
+);
+
+
