@@ -140,18 +140,13 @@ public class Main {
                     registerCustomer(); // Register a new customer
                     break;
                 case 2:
-                    deleteCustomer(); // Delete a customer
-                    break;
-                case 3:
                     updateCustomer(); // Update customer information
                     break;
-                case 4:
+                case 3:
                     manageCart(); // Manage customer's cart
                     break;
-                case 5:
+                case 4:
                     return; // Return to main menu
-                default:
-                    System.out.println("Invalid choice. Please try again.");
             }
         }
     }
@@ -160,10 +155,9 @@ public class Main {
     private static void showCustomerMenu() {
         System.out.println("\n--- Customer Management ---");
         System.out.println("1. Register Customer");
-        System.out.println("2. Delete Customer");
-        System.out.println("3. Update Customer");
-        System.out.println("4. Manage Cart");
-        System.out.println("5. Back to Main Menu");
+        System.out.println("2. Update Customer");
+        System.out.println("3. Manage Cart");
+        System.out.println("4. Back to Main Menu");
         System.out.print("Enter your choice: ");
     }
 
@@ -342,23 +336,6 @@ public class Main {
         dbHandler.executeQuery("INSERT INTO Customers VALUES ('" + email + "', '" + name + "', '" + address + "', '" + phoneNumber + "')");
         System.out.println("Customer registered successfully!");
         actionStack.push("Registered customer with email: " + email);
-    }
-
-    // Delete a customer
-    private static void deleteCustomer() {
-        System.out.print("Enter Customer Email to delete: ");
-        String email = scanner.nextLine();
-
-        Customer customer = findCustomerByEmail(email);
-        if (customer == null) {
-            System.out.println("Customer not found.");
-            return;
-        }
-
-        customerList.remove(customer);
-        dbHandler.executeQuery("DELETE FROM Customers WHERE email='" + email + "'");
-        System.out.println("Customer deleted successfully!");
-        actionStack.push("Deleted customer with email: " + email);
     }
 
     // Manage customer's cart (add drug, view cart, checkout, help)
