@@ -142,6 +142,6 @@ CREATE TABLE CartItems (
 ```
 
 ```sh
-    ![Activity Diagram of Pharmacy Management System](./ActivityDiagram.png)
+    ![Activity Diagram of Pharmacy Management System](Pharmacy-Management-System/ActivityDiagram.png)
 ```
 
