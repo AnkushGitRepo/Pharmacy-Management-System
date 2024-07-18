@@ -58,11 +58,19 @@ public class Cart {
     }
 
     public void viewCart() {
+        System.out.println("\n--- Cart Items ---");
         if (items.isEmpty()) {
             System.out.println("Cart is empty.");
         } else {
+            System.out.printf("%-10s %-20s %-10s %-10s\n", "Drug ID", "Drug Name", "Quantity", "Price");
+
             for (CartItem item : items) {
-                System.out.println(item);
+                Drug drug = item.getDrug();
+                System.out.printf("%-10d %-20s %-10d %-10.2f\n",
+                        drug.getDrugId(),
+                        drug.getDrugName(),
+                        item.getQuantity(),
+                        drug.getPrice());
             }
         }
     }
