@@ -102,15 +102,12 @@ CREATE TABLE Drugs (
     tags VARCHAR(255)
 );
 
-
-
 CREATE TABLE Customers (
     email VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL CHECK (name !~ '[0-9]'),
     address VARCHAR(255) NOT NULL,
     phone_number VARCHAR(15) NOT NULL
 );
-
 
 CREATE TABLE Cart (
     cart_id SERIAL PRIMARY KEY,
@@ -121,7 +118,6 @@ CREATE TABLE Cart (
     FOREIGN KEY (drug_id) REFERENCES Drugs(drug_id),
     UNIQUE (email, drug_id)
 );
-
 
 CREATE TABLE Orders (
     order_id SERIAL PRIMARY KEY,
@@ -139,8 +135,3 @@ CREATE TABLE CartItems (
     FOREIGN KEY (cart_id) REFERENCES Cart(cart_id),
     FOREIGN KEY (drug_id) REFERENCES Drugs(drug_id)
 );
-```
-
-
-    ![Activity Diagram of Pharmacy Management System](Pharmacy-Management-System/ActivityDiagram.png)
-
