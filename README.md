@@ -140,4 +140,6 @@ CREATE TABLE CartItems (
     FOREIGN KEY (drug_id) REFERENCES Drugs(drug_id)
 );
 
+![Activity Diagram of Pharmacy Management System](./ActivityDiagram.png)
+
 
