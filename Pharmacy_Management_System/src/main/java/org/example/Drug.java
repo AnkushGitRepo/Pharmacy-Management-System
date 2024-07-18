@@ -9,14 +9,18 @@ public class Drug {
     private Date expiryDate;
     private int quantity;
     private double price;
+    private String description;
+    private String tags;
 
-    public Drug(int drugId, String drugName, String manufacturer, Date expiryDate, int quantity, double price) {
+    public Drug(int drugId, String drugName, String manufacturer, Date expiryDate, int quantity, double price, String description, String tags) {
         this.drugId = drugId;
         this.drugName = drugName;
         this.manufacturer = manufacturer;
         this.expiryDate = expiryDate;
         this.quantity = quantity;
         this.price = price;
+        this.description = description;
+        this.tags = tags;
     }
 
     // Getters and Setters
@@ -69,9 +73,25 @@ public class Drug {
         this.price = price;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
+    }
+
     @Override
     public String toString() {
         return "Drug [drugId=" + drugId + ", drugName=" + drugName + ", manufacturer=" + manufacturer + ", expiryDate="
-                + expiryDate + ", quantity=" + quantity + ", price=" + price + "]";
+                + expiryDate + ", quantity=" + quantity + ", price=" + price + ", description=" + description + ", tags=" + tags + "]";
     }
 }
