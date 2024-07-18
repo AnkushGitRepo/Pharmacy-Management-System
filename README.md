@@ -5,7 +5,6 @@ The Pharmacy Store Management System is a console-based application designed to 
 ## Table of Contents
 
 - [Features](#features)
-- [System Requirements](#system-requirements)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Database Schema](#database-schema)
@@ -89,7 +88,7 @@ The Pharmacy Store Management System is a console-based application designed to 
 
 ## Database Schema
 
-### Drugs Table
+### Tables
 
 ```sql
 CREATE TABLE Drugs (
