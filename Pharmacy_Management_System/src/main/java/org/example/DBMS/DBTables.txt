@@ -4,8 +4,11 @@ CREATE TABLE Drugs (
     manufacturer VARCHAR(255) NOT NULL,
     expiry_date DATE NOT NULL,
     quantity INT NOT NULL,
-    price DOUBLE PRECISION NOT NULL
+    price DOUBLE PRECISION NOT NULL,
+    description TEXT,
+    tags VARCHAR(255)
 );
+
 
 
 CREATE TABLE Customers (
@@ -22,8 +25,10 @@ CREATE TABLE Cart (
     drug_id INT,
     quantity INT NOT NULL,
     FOREIGN KEY (email) REFERENCES Customers(email),
-    FOREIGN KEY (drug_id) REFERENCES Drugs(drug_id)
+    FOREIGN KEY (drug_id) REFERENCES Drugs(drug_id),
+    UNIQUE (email, drug_id)
 );
+
 
 CREATE TABLE Orders (
     order_id SERIAL PRIMARY KEY,
