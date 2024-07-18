@@ -14,10 +14,10 @@ public class DatabaseHandler {
             String url = "jdbc:postgresql://localhost:5432/pharmacy";
             String user = "postgres";  // Replace with your database username
             String password = "1806";  // Replace with your database password
-
+            Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(url, user, password);
             System.out.println("Connection to the database established successfully.");
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             System.out.println("Error connecting to the database: " + e.getMessage());
             e.printStackTrace();
         }
@@ -40,6 +40,21 @@ public class DatabaseHandler {
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public void deleteCartByEmail(String email) {
+        try {
+            String deleteCartItemsQuery = "DELETE FROM CartItems WHERE cart_id IN (SELECT cart_id FROM Cart WHERE email = '" + email + "')";
+            executeQuery(deleteCartItemsQuery);
+
+            String deleteCartQuery = "DELETE FROM Cart WHERE email = '" + email + "'";
+            executeQuery(deleteCartQuery);
+
+            System.out.println("Cart data deleted successfully for email: " + email);
+        } catch (Exception e) {
+            System.out.println("Error deleting cart data: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
