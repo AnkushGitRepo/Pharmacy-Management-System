@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class LinkedListDSA<T> implements Iterable<T>{
+
+
     class Node<T> {
         T data;
         Node<T> next;
@@ -74,6 +76,11 @@ public class LinkedListDSA<T> implements Iterable<T>{
             System.out.println(current.data);
             current = current.next;
         }
+    }
+
+    // // Clear all elements from the linked list
+    public void clear() {
+        head = null;
     }
 
     //
