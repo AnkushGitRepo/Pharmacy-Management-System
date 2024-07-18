@@ -1,0 +1,79 @@
+
+### Table: Drugs
+
+This table stores information about the drugs available in the pharmacy.
+
+- **drug_id**: Integer, primary key. It uniquely identifies each drug. It must be between 1000 and 9999 (inclusive).
+- **drug_name**: String, cannot be null. It stores the name of the drug.
+- **manufacturer**: String, cannot be null. It stores the name of the manufacturer.
+- **expiry_date**: Date, cannot be null. It stores the expiry date of the drug.
+- **quantity**: Integer, cannot be null. It stores the quantity of the drug available in stock.
+- **price**: Double precision, cannot be null. It stores the price of the drug.
+- **description**: Text, optional. It provides additional information about the drug.
+- **tags**: String, optional. It can store additional tags or keywords related to the drug.
+
+### Table: Customers
+
+This table stores information about the customers.
+
+- **email**: String, primary key. It uniquely identifies each customer by their email address.
+- **name**: String, cannot be null. It stores the customer's name. The name cannot contain numeric characters.
+- **address**: String, cannot be null. It stores the customer's address.
+- **phone_number**: String, cannot be null. It stores the customer's phone number.
+
+### Table: Cart
+
+This table represents the shopping cart of a customer.
+
+- **cart_id**: Serial, primary key. It uniquely identifies each cart.
+- **email**: String. It references the customer's email from the Customers table.
+- **drug_id**: Integer. It references the drug ID from the Drugs table.
+- **quantity**: Integer, cannot be null. It stores the quantity of the drug in the cart.
+
+**Relationships:**
+- Foreign key relationship with the Customers table via the email column.
+- Foreign key relationship with the Drugs table via the drug_id column.
+- The combination of email and drug_id is unique, ensuring that a specific drug can be in the cart of a customer only once.
+
+### Table: Orders
+
+This table stores information about the orders placed by customers.
+
+- **order_id**: Serial, primary key. It uniquely identifies each order.
+- **email**: String. It references the customer's email from the Customers table.
+- **order_date**: Date, cannot be null. It stores the date when the order was placed.
+- **total_amount**: Double precision, cannot be null. It stores the total amount for the order.
+
+**Relationships:**
+- Foreign key relationship with the Customers table via the email column.
+
+### Table: CartItems
+
+This table stores the items in the cart.
+
+- **cart_item_id**: Serial, primary key. It uniquely identifies each cart item.
+- **cart_id**: Integer. It references the cart ID from the Cart table.
+- **drug_id**: Integer. It references the drug ID from the Drugs table.
+- **quantity**: Integer, cannot be null. It stores the quantity of the drug in the cart item.
+
+**Relationships:**
+- Foreign key relationship with the Cart table via the cart_id column.
+- Foreign key relationship with the Drugs table via the drug_id column.
+
+### Relationships between Tables
+
+- **Drugs and Cart**: The drug_id in the Cart table references the drug_id in the Drugs table, indicating which drugs are in the cart.
+- **Drugs and CartItems**: The drug_id in the CartItems table references the drug_id in the Drugs table, indicating which drugs are in the cart items.
+- **Customers and Cart**: The email in the Cart table references the email in the Customers table, linking carts to specific customers.
+- **Customers and Orders**: The email in the Orders table references the email in the Customers table, linking orders to specific customers.
+- **Cart and CartItems**: The cart_id in the CartItems table references the cart_id in the Cart table, linking cart items to specific carts.
+
+### Summary of Relationships
+
+1. **Customers** have **Carts** (one-to-many relationship).
+2. **Carts** contain **Drugs** (many-to-many relationship through the Cart table).
+3. **Orders** are placed by **Customers** (one-to-many relationship).
+4. **Carts** have **CartItems** (one-to-many relationship).
+5. **CartItems** contain **Drugs** (many-to-one relationship).
+
+This schema ensures a well-structured database with clear relationships between customers, their carts, and orders, and the drugs available in the pharmacy.
