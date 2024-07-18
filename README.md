@@ -8,9 +8,6 @@ The Pharmacy Store Management System is a console-based application designed to 
 - [Installation](#installation)
 - [Usage](#usage)
 - [Database Schema](#database-schema)
-- [StackDSA Usage](#stackdsa-usage)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Features
 
