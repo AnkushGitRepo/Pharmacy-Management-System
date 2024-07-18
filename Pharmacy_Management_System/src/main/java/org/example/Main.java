@@ -78,7 +78,7 @@ public class Main {
                 choice = scanner.nextInt(); // Get user choice
                 scanner.nextLine(); // Consume newline
             } catch (InputMismatchException e) {
-                System.out.println("Invalid choice. Please try again.");
+                System.out.println("Wrong Input cannot enter characters or string");
                 scanner.nextLine(); // Consume invalid input
             }
 
@@ -131,7 +131,7 @@ public class Main {
                 choice = scanner.nextInt(); // Get user choice
                 scanner.nextLine(); // Consume newline
             } catch (InputMismatchException e) {
-                System.out.println("Invalid choice. Please try again.");
+                System.out.println("Wrong Input cannot enter characters or string");
                 scanner.nextLine(); // Consume invalid input
             }
 
@@ -147,6 +147,8 @@ public class Main {
                     break;
                 case 4:
                     return; // Return to main menu
+                default:
+                    System.out.println("Invalid choice. Please try again.");
             }
         }
     }
@@ -362,7 +364,7 @@ public class Main {
                 choice = scanner.nextInt();
                 scanner.nextLine(); // Consume newline
             } catch (InputMismatchException e) {
-                System.out.println("Invalid choice. Please try again.");
+                System.out.println("Wrong Input cannot enter characters or string");
                 scanner.nextLine(); // Consume invalid input
             }
 
@@ -381,6 +383,8 @@ public class Main {
                     break;
                 case 5:
                     return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
             }
         }
     }
