@@ -99,32 +99,63 @@ public class Order {
         Connection connection = null;
         PreparedStatement orderStatement = null;
         PreparedStatement itemStatement = null;
+        PreparedStatement updateDrugStatement = null;
 
-        String orderSQL = "INSERT INTO Orders (order_id, email, order_date, total_amount) VALUES (?, ?, ?, ?)";
+        String maxOrderIdSQL = "SELECT COALESCE(MAX(order_id), 0) FROM Orders";
+        String insertOrderSQL = "INSERT INTO Orders (order_id, email, order_date, total_amount) VALUES (?, ?, ?, ?)";
         String itemSQL = "INSERT INTO CartItems (cart_id, drug_id, quantity) VALUES (?, ?, ?)";
+        String updateDrugSQL = "UPDATE Drugs SET quantity = quantity - ? WHERE drug_id = ?";
 
         try {
             // Establish database connection
             connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/pharmacy", "postgres", "1806");
             connection.setAutoCommit(false); // Enable transaction
 
+            // Retrieve the current maximum order ID
+            Statement maxOrderIdStatement = connection.createStatement();
+            ResultSet rs = maxOrderIdStatement.executeQuery(maxOrderIdSQL);
+            if (rs.next()) {
+                this.orderId = rs.getInt(1) + 1; // Increment the max order ID or start from 1 if there are no orders
+            }
+
             // Insert order details
-            orderStatement = connection.prepareStatement(orderSQL);
+            orderStatement = connection.prepareStatement(insertOrderSQL);
             orderStatement.setInt(1, orderId);
             orderStatement.setString(2, email);
             orderStatement.setDate(3, new java.sql.Date(orderDate.getTime()));
             orderStatement.setDouble(4, totalAmount);
             orderStatement.executeUpdate();
 
+            // Retrieve the cart ID for the customer
+            String getCartIdSQL = "SELECT cart_id FROM Cart WHERE email = ?";
+            PreparedStatement getCartIdStatement = connection.prepareStatement(getCartIdSQL);
+            getCartIdStatement.setString(1, email);
+            ResultSet cartRs = getCartIdStatement.executeQuery();
+            int cartId = -1;
+            if (cartRs.next()) {
+                cartId = cartRs.getInt("cart_id");
+            }
+
+            if (cartId == -1) {
+                throw new SQLException("Cart ID not found for customer email: " + email);
+            }
+
             // Insert order items
             itemStatement = connection.prepareStatement(itemSQL);
+            updateDrugStatement = connection.prepareStatement(updateDrugSQL);
             for (CartItem item : items) {
-                itemStatement.setInt(1, orderId); // Assuming cart_id is same as order_id
+                itemStatement.setInt(1, cartId); // Use the retrieved cart_id
                 itemStatement.setInt(2, item.getDrug().getDrugId());
                 itemStatement.setInt(3, item.getQuantity());
                 itemStatement.addBatch();
+
+                // Update drug quantity
+                updateDrugStatement.setInt(1, item.getQuantity());
+                updateDrugStatement.setInt(2, item.getDrug().getDrugId());
+                updateDrugStatement.addBatch();
             }
             itemStatement.executeBatch();
+            updateDrugStatement.executeBatch();
 
             connection.commit(); // Commit transaction
             System.out.println("Order saved successfully!");
@@ -143,12 +174,14 @@ public class Order {
             try {
                 if (orderStatement != null) orderStatement.close();
                 if (itemStatement != null) itemStatement.close();
+                if (updateDrugStatement != null) updateDrugStatement.close();
                 if (connection != null) connection.close();
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
         }
     }
+
 
     @Override
     public String toString() {
