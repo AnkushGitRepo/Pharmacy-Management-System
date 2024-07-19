@@ -23,7 +23,6 @@ public class DatabaseHandler {
         }
     }
 
-
     public void executeQuery(String query) {
         try {
             Statement statement = connection.createStatement();
@@ -43,6 +42,27 @@ public class DatabaseHandler {
         }
     }
 
+    public void deleteCustomerByEmail(String email) {
+        try {
+            // Delete associated records in CartItems
+            String deleteCartItemsQuery = "DELETE FROM CartItems WHERE cart_id IN (SELECT cart_id FROM Cart WHERE email = '" + email + "')";
+            executeQuery(deleteCartItemsQuery);
+
+            // Delete associated records in Cart
+            String deleteCartQuery = "DELETE FROM Cart WHERE email = '" + email + "'";
+            executeQuery(deleteCartQuery);
+
+            // Delete the customer record
+            String deleteCustomerQuery = "DELETE FROM Customers WHERE email = '" + email + "'";
+            executeQuery(deleteCustomerQuery);
+
+            System.out.println("Customer and associated data deleted successfully for email: " + email);
+        } catch (Exception e) {
+            System.out.println("Error deleting customer data: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     public void deleteCartByEmail(String email) {
         try {
             String deleteCartItemsQuery = "DELETE FROM CartItems WHERE cart_id IN (SELECT cart_id FROM Cart WHERE email = '" + email + "')";
@@ -57,6 +77,32 @@ public class DatabaseHandler {
             e.printStackTrace();
         }
     }
+
+    public void deleteDrugById(int drugId) {
+        try {
+            // Delete associated records in CartItems
+            String deleteCartItemsQuery = "DELETE FROM CartItems WHERE drug_id = " + drugId;
+            executeQuery(deleteCartItemsQuery);
+
+            // Delete associated records in Cart
+            String deleteCartQuery = "DELETE FROM Cart WHERE drug_id = " + drugId;
+            executeQuery(deleteCartQuery);
+
+            // Delete associated records in Orders
+            String deleteOrderItemsQuery = "DELETE FROM CartItems WHERE drug_id = " + drugId + " AND cart_id IN (SELECT order_id FROM Orders WHERE order_id = cart_id)";
+            executeQuery(deleteOrderItemsQuery);
+
+            // Finally, delete the drug record
+            String deleteDrugQuery = "DELETE FROM Drugs WHERE drug_id = " + drugId;
+            executeQuery(deleteDrugQuery);
+
+            System.out.println("Drug and associated data deleted successfully for drug ID: " + drugId);
+        } catch (Exception e) {
+            System.out.println("Error deleting drug data: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 
     public void closeConnection() {
         try {
