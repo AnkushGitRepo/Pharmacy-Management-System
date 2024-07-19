@@ -19,18 +19,15 @@ public class Main {
     public static void main(String[] args) {
         dbHandler.connect(); // Connect to the database
         loadInitialData(); // Load initial data from the database
+        // WELCOME MESSAGE
+        System.out.println("\n                                       *---*---*---*---*---*---*---*---*---*---*---*---*---*---*---*---*");
+        System.out.println("                                       *--------------------------WELCOME TO---------------------------*");
+        System.out.println("                                       *------------------PHARMACY MANAGEMENT SYSTEM-------------------*");
+        System.out.println("                                       *---*---*---*---*---*---*---*---*---*---*---*---*---*---*---*---*");
 
         while (true) {
             showMainMenu(); // Show the main menu
-            int choice = -1;
-            try {
-                choice = scanner.nextInt(); // Get user choice
-                scanner.nextLine(); // Consume newline
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid choice. Please try again.");
-                scanner.nextLine(); // Consume invalid input
-            }
-
+            int choice = getInputInt();
             switch (choice) {
                 case 1:
                     drugManagement(); // Manage drugs
@@ -48,6 +45,9 @@ public class Main {
                     actionStack.printStack(); // Print the actions stack
                     break;
                 case 6:
+                    showAlerts(); // Show alerts for low stock and expired drugs
+                    break;
+                case 7:
                     System.out.println("Exiting...");
                     dbHandler.closeConnection(); // Close the database connection
                     return;
@@ -65,7 +65,8 @@ public class Main {
         System.out.println("3. Manage Cart");
         System.out.println("4. Help");
         System.out.println("5. Print Actions Stack");
-        System.out.println("6. Exit");
+        System.out.println("6. Alerts");
+        System.out.println("7. Exit");
         System.out.print("Enter your choice: ");
     }
 
@@ -73,15 +74,7 @@ public class Main {
     private static void drugManagement() {
         while (true) {
             showDrugMenu(); // Show drug management menu
-            int choice = -1;
-            try {
-                choice = scanner.nextInt(); // Get user choice
-                scanner.nextLine(); // Consume newline
-            } catch (InputMismatchException e) {
-                System.out.println("Wrong Input cannot enter characters or string");
-                scanner.nextLine(); // Consume invalid input
-            }
-
+            int choice = getInputInt();
             switch (choice) {
                 case 1:
                     addDrug(); // Add a new drug
@@ -126,15 +119,7 @@ public class Main {
     private static void customerManagement() {
         while (true) {
             showCustomerMenu(); // Show customer management menu
-            int choice = -1;
-            try {
-                choice = scanner.nextInt(); // Get user choice
-                scanner.nextLine(); // Consume newline
-            } catch (InputMismatchException e) {
-                System.out.println("Wrong Input cannot enter characters or string");
-                scanner.nextLine(); // Consume invalid input
-            }
-
+            int choice = getInputInt();
             switch (choice) {
                 case 1:
                     registerCustomer(); // Register a new customer
@@ -143,9 +128,12 @@ public class Main {
                     updateCustomer(); // Update customer information
                     break;
                 case 3:
-                    manageCart(); // Manage customer's cart
+                    deleteCustomer(); // Delete a customer
                     break;
                 case 4:
+                    manageCart(); // Manage customer's cart
+                    break;
+                case 5:
                     return; // Return to main menu
                 default:
                     System.out.println("Invalid choice. Please try again.");
@@ -158,14 +146,35 @@ public class Main {
         System.out.println("\n--- Customer Management ---");
         System.out.println("1. Register Customer");
         System.out.println("2. Update Customer");
-        System.out.println("3. Manage Cart");
-        System.out.println("4. Back to Main Menu");
+        System.out.println("3. Delete Customer");
+        System.out.println("4. Manage Cart");
+        System.out.println("5. Back to Main Menu");
         System.out.print("Enter your choice: ");
+    }
+
+    // Register a new customer
+    private static void registerCustomer() {
+        System.out.print("Enter Customer Email: ");
+        scanner.nextLine();
+        String email = scanner.nextLine();
+        System.out.print("Enter Customer Name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter Customer Address: ");
+        String address = scanner.nextLine();
+        System.out.print("Enter Customer Phone Number: ");
+        String phoneNumber = scanner.nextLine();
+
+        Customer customer = new Customer(email, name, address, phoneNumber);
+        customerList.add(customer);
+        dbHandler.executeQuery("INSERT INTO Customers VALUES ('" + email + "', '" + name + "', '" + address + "', '" + phoneNumber + "')");
+        System.out.println("Customer registered successfully!");
+        actionStack.push("Registered customer with email: " + email);
     }
 
     // Update customer information
     private static void updateCustomer() {
         System.out.print("Enter Customer Email to update: ");
+        scanner.nextLine();
         String email = scanner.nextLine();
 
         Customer customer = findCustomerByEmail(email);
@@ -190,11 +199,28 @@ public class Main {
         actionStack.push("Updated customer with email: " + email);
     }
 
+    // Delete a customer
+    private static void deleteCustomer() {
+        System.out.print("Enter Customer Email to delete: ");
+        String email = scanner.nextLine();
+
+        Customer customer = findCustomerByEmail(email);
+        if (customer == null) {
+            System.out.println("Customer not found.");
+            return;
+        }
+
+        dbHandler.deleteCustomerByEmail(email);
+        customerList.remove(customer);
+        System.out.println("Customer deleted successfully!");
+        actionStack.push("Deleted customer with email: " + email);
+    }
+
     // Add a new drug
     private static void addDrug() {
         System.out.print("Enter Drug ID: ");
-        int drugId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        int drugId = getInputInt();
+        scanner.nextLine(); //Consume newLine
         System.out.print("Enter Drug Name: ");
         String drugName = scanner.nextLine();
         System.out.print("Enter Manufacturer: ");
@@ -202,9 +228,9 @@ public class Main {
         System.out.print("Enter Expiry Date (yyyy-MM-dd): ");
         String expiryDateStr = scanner.nextLine();
         System.out.print("Enter Quantity: ");
-        int quantity = scanner.nextInt();
+        int quantity = getInputInt();
         System.out.print("Enter Price: ");
-        double price = scanner.nextDouble();
+        double price = getInputDouble();
         scanner.nextLine(); // Consume newline
         System.out.print("Enter Description: ");
         String description = scanner.nextLine();
@@ -226,7 +252,7 @@ public class Main {
     // Update an existing drug
     private static void updateDrug() {
         System.out.print("Enter Drug ID to update: ");
-        int drugId = scanner.nextInt();
+        int drugId = getInputInt();
         scanner.nextLine(); // Consume newline
 
         Drug drug = findDrugById(drugId);
@@ -235,43 +261,76 @@ public class Main {
             return;
         }
 
-        System.out.print("Enter new Drug Name: ");
-        String drugName = scanner.nextLine();
-        System.out.print("Enter new Manufacturer: ");
-        String manufacturer = scanner.nextLine();
-        System.out.print("Enter new Expiry Date (yyyy-MM-dd): ");
-        String expiryDateStr = scanner.nextLine();
-        System.out.print("Enter new Quantity: ");
-        int quantity = scanner.nextInt();
-        System.out.print("Enter new Price: ");
-        double price = scanner.nextDouble();
-        scanner.nextLine(); // Consume newline
-        System.out.print("Enter new Description: ");
-        String description = scanner.nextLine();
-        System.out.print("Enter new Tags: ");
-        String tags = scanner.nextLine();
+        System.out.println("Enter 'none' if you do not want to update a field.");
 
-        try {
-            Date expiryDate = new SimpleDateFormat("yyyy-MM-dd").parse(expiryDateStr);
+        System.out.print("Enter new Drug Name [" + drug.getDrugName() + "]: ");
+        String drugName = scanner.nextLine();
+        if (!drugName.equalsIgnoreCase("none")) {
             drug.setDrugName(drugName);
-            drug.setManufacturer(manufacturer);
-            drug.setExpiryDate(expiryDate);
-            drug.setQuantity(quantity);
-            drug.setPrice(price);
-            drug.setDescription(description);
-            drug.setTags(tags);
-            dbHandler.executeQuery("UPDATE Drugs SET drug_name='" + drugName + "', manufacturer='" + manufacturer + "', expiry_date='" + expiryDateStr + "', quantity=" + quantity + ", price=" + price + ", description='" + description + "', tags='" + tags + "' WHERE drug_id=" + drugId);
-            System.out.println("Drug updated successfully!");
-            actionStack.push("Updated drug with ID: " + drugId);
-        } catch (ParseException e) {
-            System.out.println("Invalid date format. Please try again.");
         }
+
+        System.out.print("Enter new Manufacturer [" + drug.getManufacturer() + "]: ");
+        String manufacturer = scanner.nextLine();
+        if (!manufacturer.equalsIgnoreCase("none")) {
+            drug.setManufacturer(manufacturer);
+        }
+
+        System.out.print("Enter new Expiry Date (yyyy-MM-dd) [" + new SimpleDateFormat("yyyy-MM-dd").format(drug.getExpiryDate()) + "]: ");
+        String expiryDateStr = scanner.nextLine();
+        if (!expiryDateStr.equalsIgnoreCase("none")) {
+            try {
+                Date expiryDate = new SimpleDateFormat("yyyy-MM-dd").parse(expiryDateStr);
+                drug.setExpiryDate(expiryDate);
+            } catch (ParseException e) {
+                System.out.println("Invalid date format. Keeping the old date.");
+            }
+        }
+
+        System.out.print("Enter new Quantity [" + drug.getQuantity() + "]: ");
+        String quantityStr = scanner.nextLine();
+        if (!quantityStr.equalsIgnoreCase("none")) {
+            try {
+                int quantity = Integer.parseInt(quantityStr);
+                drug.setQuantity(quantity);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid quantity format. Keeping the old quantity.");
+            }
+        }
+
+        System.out.print("Enter new Price [" + drug.getPrice() + "]: ");
+        String priceStr = scanner.nextLine();
+        if (!priceStr.equalsIgnoreCase("none")) {
+            try {
+                double price = Double.parseDouble(priceStr);
+                drug.setPrice(price);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid price format. Keeping the old price.");
+            }
+        }
+
+        System.out.print("Enter new Description [" + drug.getDescription() + "]: ");
+        String description = scanner.nextLine();
+        if (!description.equalsIgnoreCase("none")) {
+            drug.setDescription(description);
+        }
+
+        System.out.print("Enter new Tags [" + drug.getTags() + "]: ");
+        String tags = scanner.nextLine();
+        if (!tags.equalsIgnoreCase("none")) {
+            drug.setTags(tags);
+        }
+
+        // Update the database with the new values
+        String expiryDateStrForDB = new SimpleDateFormat("yyyy-MM-dd").format(drug.getExpiryDate());
+        dbHandler.executeQuery("UPDATE Drugs SET drug_name='" + drug.getDrugName() + "', manufacturer='" + drug.getManufacturer() + "', expiry_date='" + expiryDateStrForDB + "', quantity=" + drug.getQuantity() + ", price=" + drug.getPrice() + ", description='" + drug.getDescription() + "', tags='" + drug.getTags() + "' WHERE drug_id=" + drugId);
+        System.out.println("Drug updated successfully!");
+        actionStack.push("Updated drug with ID: " + drugId);
     }
 
     // Delete a drug
     private static void deleteDrug() {
         System.out.print("Enter Drug ID to delete: ");
-        int drugId = scanner.nextInt();
+        int drugId = getInputInt();
         scanner.nextLine(); // Consume newline
 
         Drug drug = findDrugById(drugId);
@@ -280,9 +339,12 @@ public class Main {
             return;
         }
 
+        // Perform cascading deletes
+        dbHandler.deleteDrugById(drugId);
+
+        // Remove the drug from the local list
         drugList.remove(drug);
-        dbHandler.executeQuery("DELETE FROM Drugs WHERE drug_id=" + drugId);
-        System.out.println("Drug deleted successfully!");
+        System.out.println("Drug deleted successfully along with all related data!");
         actionStack.push("Deleted drug with ID: " + drugId);
     }
 
@@ -322,27 +384,10 @@ public class Main {
         actionStack.push("Listed expired drugs");
     }
 
-    // Register a new customer
-    private static void registerCustomer() {
-        System.out.print("Enter Customer Email: ");
-        String email = scanner.nextLine();
-        System.out.print("Enter Customer Name: ");
-        String name = scanner.nextLine();
-        System.out.print("Enter Customer Address: ");
-        String address = scanner.nextLine();
-        System.out.print("Enter Customer Phone Number: ");
-        String phoneNumber = scanner.nextLine();
-
-        Customer customer = new Customer(email, name, address, phoneNumber);
-        customerList.add(customer);
-        dbHandler.executeQuery("INSERT INTO Customers VALUES ('" + email + "', '" + name + "', '" + address + "', '" + phoneNumber + "')");
-        System.out.println("Customer registered successfully!");
-        actionStack.push("Registered customer with email: " + email);
-    }
-
     // Manage customer's cart (add drug, view cart, checkout, help)
     private static void manageCart() {
         System.out.print("Enter Customer Email to manage cart: ");
+        scanner.nextLine();
         String email = scanner.nextLine();
 
         Customer customer = findCustomerByEmail(email);
@@ -359,15 +404,7 @@ public class Main {
 
         while (true) {
             showCartMenu();
-            int choice = -1;
-            try {
-                choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
-            } catch (InputMismatchException e) {
-                System.out.println("Wrong Input cannot enter characters or string");
-                scanner.nextLine(); // Consume invalid input
-            }
-
+            int choice = getInputInt();
             switch (choice) {
                 case 1:
                     addDrugToCart(cart);
@@ -419,6 +456,7 @@ public class Main {
         System.out.println(); // Ensure we move to the next line after the loop
 
         System.out.print("\nEnter Drug ID or Drug Name to add to cart: ");
+        scanner.nextLine();
         String input = scanner.nextLine();
         Drug drug = null;
 
@@ -440,8 +478,13 @@ public class Main {
         }
 
         System.out.print("Enter Quantity: ");
-        int quantity = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        int quantity = getInputInt();
+
+        // Check if the quantity is available
+        if (drug.getQuantity() < quantity) {
+            System.out.println("Insufficient stock. Available quantity: " + drug.getQuantity());
+            return;
+        }
 
         CartItem cartItem = new CartItem(drug, quantity);
         cart.addToCart(cartItem);
@@ -459,15 +502,6 @@ public class Main {
         }
     }
 
-    // Find drug by name
-    private static Drug findDrugByName(String drugName) {
-        for (Drug drug : drugList) {
-            if (drug.getDrugName().equalsIgnoreCase(drugName)) {
-                return drug;
-            }
-        }
-        return null;
-    }
 
     // Find drug by ID
     private static Drug findDrugById(int drugId) {
@@ -479,62 +513,73 @@ public class Main {
         return null;
     }
 
+    // Find drug by name
+    private static Drug findDrugByName(String drugName) {
+        for (Drug drug : drugList) {
+            if (drug.getDrugName().equalsIgnoreCase(drugName)) {
+                return drug;
+            }
+        }
+        return null;
+    }
+
     // View items in the cart
     private static void viewCart(Cart cart) {
-        Scanner scanner = new Scanner(System.in);
-
         System.out.println("\n--- Cart Items ---");
-        if (cart.getItems().isEmpty()) {
-            System.out.println("Cart is empty.");
-        } else {
-            System.out.printf("%-10s %-20s %-10s %-10s\n", "Drug ID", "Drug Name", "Quantity", "Price");
 
-            for (CartItem item : cart.getItems()) {
-                Drug drug = item.getDrug();
-                System.out.printf("%-10d %-20s %-10d %-10.2f\n",
-                        drug.getDrugId(),
-                        drug.getDrugName(),
-                        item.getQuantity(),
-                        drug.getPrice());
+        // Query to fetch cart items from the database
+        String query = "SELECT c.drug_id, d.drug_name, d.price, c.quantity " +
+                "FROM Cart c " +
+                "JOIN Drugs d ON c.drug_id = d.drug_id " +
+                "WHERE c.email = '" + cart.getEmail() + "'";
+
+        ResultSet resultSet = dbHandler.executeSelectQuery(query);
+
+        try {
+            if (!resultSet.isBeforeFirst()) {
+                System.out.println("Cart is empty.");
+                return;
             }
 
+            System.out.printf("%-10s %-20s %-10s %-10s\n", "Drug ID", "Drug Name", "Quantity", "Price");
+
+            while (resultSet.next()) {
+                int drugId = resultSet.getInt("drug_id");
+                String drugName = resultSet.getString("drug_name");
+                int quantity = resultSet.getInt("quantity");
+                double price = resultSet.getDouble("price");
+
+                System.out.printf("%-10d %-20s %-10d %-10.2f\n", drugId, drugName, quantity, price);
+            }
+
+            // Prompt for removing items from the cart
             System.out.print("\nDo you want to remove any drug from the cart? (yes/no): ");
+            scanner.nextLine();
             String response = scanner.nextLine();
 
             if (response.equalsIgnoreCase("yes")) {
                 System.out.print("Enter Drug ID to remove: ");
-                int drugId = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
+                int drugIdToRemove = getInputInt();
 
-                CartItem itemToRemove = null;
-                for (CartItem item : cart.getItems()) {
-                    if (item.getDrug().getDrugId() == drugId) {
-                        itemToRemove = item;
-                        break;
-                    }
-                }
+                // Remove the drug from the cart in the database
+                String deleteQuery = "DELETE FROM Cart WHERE email='" + cart.getEmail() + "' AND drug_id=" + drugIdToRemove;
+                dbHandler.executeQuery(deleteQuery);
 
-                if (itemToRemove != null) {
-                    cart.removeFromCart(itemToRemove);
-                    System.out.println("Drug removed from cart successfully!");
-                    // Optionally update the database to reflect this change
-                    try {
-                        dbHandler.executeQuery("DELETE FROM Cart WHERE email='" + cart.getEmail() + "' AND drug_id=" + drugId);
-                        actionStack.push("Removed drug from cart: " + drugId);
-                    } catch (Exception e) {
-                        System.out.println("Error updating cart in the database: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-                } else {
-                    System.out.println("Drug not found in cart.");
-                }
+                System.out.println("Drug removed from cart successfully!");
+                actionStack.push("Removed drug from cart: " + drugIdToRemove);
             }
+
+        } catch (SQLException e) {
+            System.out.println("Error fetching cart data: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
 
     // Help method to provide drug information
     private static void help() {
         System.out.print("\nEnter drug description, tag, name, or ID to get information: \n");
+        scanner.nextLine();
         String input = scanner.nextLine();
 
         Drug drug = null;
@@ -565,14 +610,37 @@ public class Main {
         }
     }
 
-    // Find drug by description or tag
-    private static Drug findDrugByDescriptionOrTag(String input) {
+    // Show alerts for low stock and expired drugs
+    private static void showAlerts() {
+        System.out.println("\n--- Low Stock Alerts (Quantity < 20) ---");
+        System.out.printf("%-10s %-20s %-15s %-10s %-10s\n", "Drug ID", "Drug Name", "Manufacturer", "Quantity", "Price");
+
         for (Drug drug : drugList) {
-            if (drug.getDescription().toLowerCase().contains(input.toLowerCase()) || drug.getTags().toLowerCase().contains(input.toLowerCase())) {
-                return drug;
+            if (drug.getQuantity() < 20) {
+                System.out.printf("%-10d %-20s %-15s %-10d %-10.2f\n",
+                        drug.getDrugId(),
+                        drug.getDrugName(),
+                        drug.getManufacturer(),
+                        drug.getQuantity(),
+                        drug.getPrice());
             }
         }
-        return null;
+
+        System.out.println("\n--- Expired Drugs ---");
+        System.out.printf("%-10s %-20s %-15s %-10s %-10s\n", "Drug ID", "Drug Name", "Expiry Date", "Quantity", "Price");
+
+        Date currentDate = new Date();
+        for (Drug drug : drugList) {
+            if (drug.getExpiryDate().before(currentDate)) {
+                System.out.printf("%-10d %-20s %-15s %-10d %-10.2f\n",
+                        drug.getDrugId(),
+                        drug.getDrugName(),
+                        new SimpleDateFormat("yyyy-MM-dd").format(drug.getExpiryDate()),
+                        drug.getQuantity(),
+                        drug.getPrice());
+            }
+        }
+        actionStack.push("Viewed drug Alerts Information: ");
     }
 
     // Checkout method to finalize the cart
@@ -638,7 +706,15 @@ public class Main {
         return null;
     }
 
-
+    // Find drug by description or tag
+    private static Drug findDrugByDescriptionOrTag(String input) {
+        for (Drug drug : drugList) {
+            if (drug.getDescription().toLowerCase().contains(input.toLowerCase()) || drug.getTags().toLowerCase().contains(input.toLowerCase())) {
+                return drug;
+            }
+        }
+        return null;
+    }
 
     // Load initial data from the database
     private static void loadInitialData() {
@@ -719,6 +795,30 @@ public class Main {
             System.out.println("Initial cart data loaded successfully!");
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    // Utility method to handle integer input
+    private static int getInputInt() {
+        while (true) {
+            try {
+                return scanner.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.print("Invalid input. Please enter a valid number: ");
+                scanner.nextLine(); // Consume invalid input
+            }
+        }
+    }
+
+    // Utility method to handle double input
+    private static double getInputDouble() {
+        while (true) {
+            try {
+                return scanner.nextDouble();
+            } catch (InputMismatchException e) {
+                System.out.print("Invalid input. Please enter a valid number: ");
+                scanner.nextLine(); // Consume invalid input
+            }
         }
     }
 }
