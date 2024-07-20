@@ -1,7 +1,6 @@
 package org.example;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class LinkedListDSA<T> implements Iterable<T>{
 
