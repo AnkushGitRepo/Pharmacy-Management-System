@@ -94,6 +94,20 @@ public class Order {
         }
     }
 
+    /**
+     * Saves the order details and associated items to the database.
+     *
+     * This method performs the following steps:
+     * 1. Establishes a connection to the database.
+     * 2. Retrieves the current maximum order ID from the Orders table to determine the next order ID.
+     * 3. Inserts the order details into the Orders table.
+     * 4. Inserts each item in the order into the OrderItems table.
+     * 5. Updates the quantity of each drug in the Drugs table to reflect the purchase.
+     * 6. Commits the transaction to ensure all changes are saved.
+     * 7. Rolls back the transaction in case of any error to maintain data integrity.
+     *
+     * Throws SQLException If there is an error while interacting with the database.
+     */
     public void saveOrder() throws SQLException {
         Connection connection = null;
         PreparedStatement orderStatement = null;
