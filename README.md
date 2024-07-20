@@ -124,11 +124,13 @@ CREATE TABLE Orders (
     FOREIGN KEY (email) REFERENCES Customers(email)
 );
 
-CREATE TABLE CartItems (
-    cart_item_id SERIAL PRIMARY KEY,
-    cart_id INT,
-    drug_id INT,
+CREATE TABLE OrderItems (
+    order_item_id SERIAL PRIMARY KEY,
+    order_id INT NOT NULL,
+    drug_id INT NOT NULL,
     quantity INT NOT NULL,
-    FOREIGN KEY (cart_id) REFERENCES Cart(cart_id),
+    price DOUBLE PRECISION NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id),
     FOREIGN KEY (drug_id) REFERENCES Drugs(drug_id)
 );
+
