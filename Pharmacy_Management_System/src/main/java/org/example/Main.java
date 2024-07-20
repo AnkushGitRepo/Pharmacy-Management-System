@@ -13,7 +13,7 @@ public class Main {
     private static LinkedListDSA<Customer> customerList = new LinkedListDSA<>(); // List to store customers
     private static LinkedListDSA<Cart> cartList = new LinkedListDSA<>(); // List to store carts
     private static StackDSA actionStack = new StackDSA(100); // Stack to store user actions
-    private static int cartIdCounter = 1; // Counter for cart IDs
+    private static int cartIdCounter = 1; // cartIdCounter is incremented to ensure that each cart has a unique identifier.
 
     public static void main(String[] args) {
         dbHandler.connect(); // Connect to the database
@@ -650,7 +650,19 @@ public class Main {
         actionStack.push("Viewed drug Alerts Information: ");
     }
 
-    // Checkout method to finalize the cart
+
+    /**
+     * Handles the checkout process for a customer's cart.
+     *
+     * This method finalizes the purchase for the items in the customer's cart. It performs the following steps:
+     * 1. Validates that the cart is not empty.
+     * 2. Calculates the total amount for the items in the cart.
+     * 3. Creates an Order object and saves the order details in the database.
+     * 4. Generates an invoice for the order.
+     * 5. Clears the cart and updates the drug quantities in the database.
+     * 6. Logs the action to the action stack.
+     *
+     */
     private static void checkout(Cart cart) {
         if (cart.getItems().isEmpty()) {
             System.out.println("Cart is empty. Cannot checkout.");
