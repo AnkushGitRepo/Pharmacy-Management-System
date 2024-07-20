@@ -1,11 +1,10 @@
 package org.example;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.LinkedList;
+import java.util.*;
 
 public class Order {
     private int orderId;
@@ -103,7 +102,7 @@ public class Order {
 
         String maxOrderIdSQL = "SELECT COALESCE(MAX(order_id), 0) FROM Orders";
         String insertOrderSQL = "INSERT INTO Orders (order_id, email, order_date, total_amount) VALUES (?, ?, ?, ?)";
-        String itemSQL = "INSERT INTO CartItems (cart_id, drug_id, quantity) VALUES (?, ?, ?)";
+        String insertOrderItemSQL = "INSERT INTO OrderItems (order_id, drug_id, quantity, price) VALUES (?, ?, ?, ?)";
         String updateDrugSQL = "UPDATE Drugs SET quantity = quantity - ? WHERE drug_id = ?";
 
         try {
@@ -126,39 +125,23 @@ public class Order {
             orderStatement.setDouble(4, totalAmount);
             orderStatement.executeUpdate();
 
-            // Retrieve the cart ID for the customer
-            String getCartIdSQL = "SELECT cart_id FROM Cart WHERE email = ?";
-            PreparedStatement getCartIdStatement = connection.prepareStatement(getCartIdSQL);
-            getCartIdStatement.setString(1, email);
-            ResultSet cartRs = getCartIdStatement.executeQuery();
-            int cartId = -1;
-            if (cartRs.next()) {
-                cartId = cartRs.getInt("cart_id");
-            }
-
-            if (cartId == -1) {
-                throw new SQLException("Cart ID not found for customer email: " + email);
-            }
-
-            // Insert order items
-            itemStatement = connection.prepareStatement(itemSQL);
-            updateDrugStatement = connection.prepareStatement(updateDrugSQL);
+            // Insert each cart item into OrderItems table and update drug quantities
             for (CartItem item : items) {
-                itemStatement.setInt(1, cartId); // Use the retrieved cart_id
+                itemStatement = connection.prepareStatement(insertOrderItemSQL);
+                itemStatement.setInt(1, orderId);
                 itemStatement.setInt(2, item.getDrug().getDrugId());
                 itemStatement.setInt(3, item.getQuantity());
-                itemStatement.addBatch();
+                itemStatement.setDouble(4, item.getDrug().getPrice());
+                itemStatement.executeUpdate();
 
-                // Update drug quantity
+                // Update the drug quantity in the database
+                updateDrugStatement = connection.prepareStatement(updateDrugSQL);
                 updateDrugStatement.setInt(1, item.getQuantity());
                 updateDrugStatement.setInt(2, item.getDrug().getDrugId());
-                updateDrugStatement.addBatch();
+                updateDrugStatement.executeUpdate();
             }
-            itemStatement.executeBatch();
-            updateDrugStatement.executeBatch();
 
             connection.commit(); // Commit transaction
-            System.out.println("Order saved successfully!");
 
         } catch (SQLException e) {
             if (connection != null) {
@@ -181,7 +164,6 @@ public class Order {
             }
         }
     }
-
 
     @Override
     public String toString() {
