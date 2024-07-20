@@ -1,10 +1,6 @@
 package org.example;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class DatabaseHandler {
     private Connection connection;
@@ -44,9 +40,16 @@ public class DatabaseHandler {
 
     public void deleteCustomerByEmail(String email) {
         try {
-            // Delete associated records in CartItems
-            String deleteCartItemsQuery = "DELETE FROM CartItems WHERE cart_id IN (SELECT cart_id FROM Cart WHERE email = '" + email + "')";
-            executeQuery(deleteCartItemsQuery);
+            // Delete associated records in OrderItems
+            String deleteOrderItemsQuery = "DELETE FROM OrderItems WHERE order_id IN (SELECT order_id FROM Orders WHERE email = ?)";
+            try (PreparedStatement pst = connection.prepareStatement(deleteOrderItemsQuery)) {
+                pst.setString(1, email);
+                pst.executeUpdate();
+            }
+
+            // Delete associated records in Orders
+            String deleteOrdersQuery = "DELETE FROM Orders WHERE email = '" +email+"'";
+            executeQuery(deleteOrdersQuery);
 
             // Delete associated records in Cart
             String deleteCartQuery = "DELETE FROM Cart WHERE email = '" + email + "'";
@@ -65,9 +68,6 @@ public class DatabaseHandler {
 
     public void deleteCartByEmail(String email) {
         try {
-            String deleteCartItemsQuery = "DELETE FROM CartItems WHERE cart_id IN (SELECT cart_id FROM Cart WHERE email = '" + email + "')";
-            executeQuery(deleteCartItemsQuery);
-
             String deleteCartQuery = "DELETE FROM Cart WHERE email = '" + email + "'";
             executeQuery(deleteCartQuery);
 
@@ -80,17 +80,11 @@ public class DatabaseHandler {
 
     public void deleteDrugById(int drugId) {
         try {
-            // Delete associated records in CartItems
-            String deleteCartItemsQuery = "DELETE FROM CartItems WHERE drug_id = " + drugId;
-            executeQuery(deleteCartItemsQuery);
-
+            String deleteOrderItemsQuery = "DELETE FROM OrderItems WHERE drug_id = " + drugId;
+            executeQuery(deleteOrderItemsQuery);
             // Delete associated records in Cart
             String deleteCartQuery = "DELETE FROM Cart WHERE drug_id = " + drugId;
             executeQuery(deleteCartQuery);
-
-            // Delete associated records in Orders
-            String deleteOrderItemsQuery = "DELETE FROM CartItems WHERE drug_id = " + drugId + " AND cart_id IN (SELECT order_id FROM Orders WHERE order_id = cart_id)";
-            executeQuery(deleteOrderItemsQuery);
 
             // Finally, delete the drug record
             String deleteDrugQuery = "DELETE FROM Drugs WHERE drug_id = " + drugId;
