@@ -2,10 +2,9 @@ package org.example;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.InputMismatchException;
-import java.util.Scanner;
+import java.util.*;
 import java.sql.*;
+import java.util.Date;
 
 public class Main {
     private static Scanner scanner = new Scanner(System.in); // Scanner for user input
@@ -202,6 +201,7 @@ public class Main {
     // Delete a customer
     private static void deleteCustomer() {
         System.out.print("Enter Customer Email to delete: ");
+        scanner.nextLine();
         String email = scanner.nextLine();
 
         Customer customer = findCustomerByEmail(email);
@@ -438,6 +438,7 @@ public class Main {
     }
 
     // Add a drug to the cart
+    // Add a drug to the cart
     private static void addDrugToCart(Cart cart) {
         System.out.println("\n--- Available Drugs ---");
         System.out.printf("%-10s %-20s", "Drug ID", "Drug Name");
@@ -493,6 +494,12 @@ public class Main {
             String email = cart.getEmail();
             dbHandler.executeQuery("INSERT INTO Cart (email, drug_id, quantity) VALUES ('" + email + "', " + drug.getDrugId() + ", " + quantity + ") " +
                     "ON CONFLICT (email, drug_id) DO UPDATE SET quantity = Cart.quantity + EXCLUDED.quantity");
+
+            // Update the drug quantity in the database
+            int newQuantity = drug.getQuantity() - quantity;
+            dbHandler.executeQuery("UPDATE Drugs SET quantity = " + newQuantity + " WHERE drug_id = " + drug.getDrugId());
+            // Update the drug quantity in the local list
+            drug.setQuantity(newQuantity);
 
             System.out.println("Drug added to cart successfully!");
             actionStack.push("Added drug to cart: " + drug.getDrugId() + " with quantity: " + quantity);
@@ -725,7 +732,7 @@ public class Main {
 
     // Load drug data from the database
     private static void loadDrugData() {
-        String query = "SELECT * FROM Drugs";
+        String query = "SELECT * FROM Drugs ORDER BY drug_id ASC";
         ResultSet resultSet = dbHandler.executeSelectQuery(query);
 
         try {
