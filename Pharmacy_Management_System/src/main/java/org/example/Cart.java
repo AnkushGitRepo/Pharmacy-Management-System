@@ -1,8 +1,6 @@
 package org.example;
 
-import java.util.Date;
 import java.util.LinkedList;
-import java.util.List;
 
 public class Cart {
     private int cartId;
@@ -47,73 +45,6 @@ public class Cart {
         } else {
             System.out.println("Invalid cart item.");
         }
-    }
-
-    public void removeFromCart(CartItem item) {
-        if (this.items.contains(item)) {
-            this.items.remove(item);
-        } else {
-            System.out.println("Item not found in cart.");
-        }
-    }
-
-    public void viewCart() {
-        System.out.println("\n--- Cart Items ---");
-        if (items.isEmpty()) {
-            System.out.println("Cart is empty.");
-        } else {
-            System.out.printf("%-10s %-20s %-10s %-10s\n", "Drug ID", "Drug Name", "Quantity", "Price");
-
-            for (CartItem item : items) {
-                Drug drug = item.getDrug();
-                System.out.printf("%-10d %-20s %-10d %-10.2f\n",
-                        drug.getDrugId(),
-                        drug.getDrugName(),
-                        item.getQuantity(),
-                        drug.getPrice());
-            }
-        }
-    }
-
-
-    public void checkout() {
-        if (items.isEmpty()) {
-            System.out.println("Cart is empty. Cannot checkout.");
-            return;
-        }
-
-        double totalAmount = calculateTotalAmount();
-
-        if (totalAmount == 0) {
-            System.out.println("Total amount is zero. Cannot checkout.");
-            return;
-        }
-
-        Order order = new Order(cartId, email, new Date(), totalAmount, items);
-
-        try {
-            order.saveOrder();
-            order.generateInvoice();
-
-            items.clear();
-            System.out.println("Checkout successful! Invoice generated.");
-        } catch (Exception e) {
-            System.out.println("Error during checkout: " + e.getMessage());
-        }
-    }
-
-
-
-    private double calculateTotalAmount() {
-        double totalAmount = 0;
-        for (CartItem item : items) {
-            if (item.getDrug() != null && item.getQuantity() > 0) {
-                totalAmount += item.getQuantity() * item.getDrug().getPrice();
-            } else {
-                System.out.println("Invalid item in cart: " + item);
-            }
-        }
-        return totalAmount;
     }
 
     @Override
