@@ -38,15 +38,18 @@ public class Main {
                     manageCart(); // Manage cart
                     break;
                 case 4:
-                    help(); // Show help information
+                    actionStack.printStack(); // Print the actions stack
                     break;
                 case 5:
-                    actionStack.printStack(); // Print the actions stack
+                    report(); // Generate sales report
                     break;
                 case 6:
                     showAlerts(); // Show alerts for low stock and expired drugs
                     break;
                 case 7:
+                    help(); // Show help information
+                    break;
+                case 8:
                     System.out.println("Exiting...");
                     dbHandler.closeConnection(); // Close the database connection
                     return;
@@ -62,10 +65,11 @@ public class Main {
         System.out.println("1. Drug Management");
         System.out.println("2. Customer Management");
         System.out.println("3. Manage Cart");
-        System.out.println("4. Help");
-        System.out.println("5. Print Actions Stack");
+        System.out.println("4. Print Actions Stack");
+        System.out.println("5. Generate Sales Report");
         System.out.println("6. Alerts");
-        System.out.println("7. Exit");
+        System.out.println("7. Help");
+        System.out.println("8. Exit");
         System.out.print("Enter your choice: ");
     }
 
@@ -614,6 +618,21 @@ public class Main {
             actionStack.push("Viewed information for drug: " + drug.getDrugId());
         } else {
             System.out.println("Drug not found.");
+        }
+    }
+
+    // Method to generate sales report
+    private static void report() {
+        System.out.print("Enter the start date (yyyy-MM-dd): ");
+        scanner.nextLine(); // Consume newline
+        String startDateStr = scanner.nextLine();
+
+        try {
+            Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse(startDateStr);
+            Date currentDate = new Date();
+            dbHandler.generateSalesReport(startDate, currentDate);
+        } catch (ParseException e) {
+            System.out.println("Invalid date format. Please try again.");
         }
     }
 
