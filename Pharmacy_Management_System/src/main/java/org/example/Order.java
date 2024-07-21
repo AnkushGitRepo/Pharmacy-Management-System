@@ -117,7 +117,6 @@ public class Order {
         String maxOrderIdSQL = "SELECT COALESCE(MAX(order_id), 0) FROM Orders";
         String insertOrderSQL = "INSERT INTO Orders (order_id, email, order_date, total_amount) VALUES (?, ?, ?, ?)";
         String insertOrderItemSQL = "INSERT INTO OrderItems (order_id, drug_id, quantity, price) VALUES (?, ?, ?, ?)";
-        String updateDrugSQL = "UPDATE Drugs SET quantity = quantity - ? WHERE drug_id = ?";
 
         try {
             // Establish database connection
@@ -147,14 +146,7 @@ public class Order {
                 itemStatement.setInt(3, item.getQuantity());
                 itemStatement.setDouble(4, item.getDrug().getPrice());
                 itemStatement.executeUpdate();
-
-                // Update the drug quantity in the database
-                updateDrugStatement = connection.prepareStatement(updateDrugSQL);
-                updateDrugStatement.setInt(1, item.getQuantity());
-                updateDrugStatement.setInt(2, item.getDrug().getDrugId());
-                updateDrugStatement.executeUpdate();
             }
-
             connection.commit(); // Commit transaction
 
         } catch (SQLException e) {
@@ -171,7 +163,6 @@ public class Order {
             try {
                 if (orderStatement != null) orderStatement.close();
                 if (itemStatement != null) itemStatement.close();
-                if (updateDrugStatement != null) updateDrugStatement.close();
                 if (connection != null) connection.close();
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
