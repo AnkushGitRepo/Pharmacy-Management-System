@@ -29,10 +29,6 @@ public class Drug {
         return drugId;
     }
 
-    public void setDrugId(int drugId) {
-        this.drugId = drugId;
-    }
-
     public String getDrugName() {
         return drugName;
     }
