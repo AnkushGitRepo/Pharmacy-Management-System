@@ -1,9 +1,6 @@
 package org.example;
 
-import java.util.*;
-
-public class LinkedListDSA<T> implements Iterable<T>{
-
+public class LinkedListDSA<T> {
 
     class Node<T> {
         T data;
@@ -16,11 +13,17 @@ public class LinkedListDSA<T> implements Iterable<T>{
     }
 
     private Node<T> head;
+    private int size;
+
+    // Constructor
+    public LinkedListDSA() {
+        this.head = null;
+        this.size = 0;
+    }
 
     // Add an element to the end of the linked list
     public void add(T data) {
         Node<T> newNode = new Node<>(data);
-
         if (head == null) {
             head = newNode;
         } else {
@@ -30,6 +33,7 @@ public class LinkedListDSA<T> implements Iterable<T>{
             }
             current.next = newNode;
         }
+        size++;
     }
 
     // Remove an element from the linked list
@@ -40,6 +44,7 @@ public class LinkedListDSA<T> implements Iterable<T>{
 
         if (head.data.equals(data)) {
             head = head.next;
+            size--;
             return;
         }
 
@@ -53,7 +58,44 @@ public class LinkedListDSA<T> implements Iterable<T>{
 
         if (current != null) {
             previous.next = current.next;
+            size--;
         }
+    }
+
+    // Get the size of the linked list
+    public int size() {
+        return size;
+    }
+
+    // Check if the linked list is empty
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    // Get the element at a specific index
+    public T get(int index) {
+        checkIndex(index);
+        Node<T> current = head;
+        for (int i = 0; i < index; i++) {
+            current = current.next;
+        }
+        return current.data;
+    }
+
+    // Set the element at a specific index
+    public void set(int index, T data) {
+        checkIndex(index);
+        Node<T> current = head;
+        for (int i = 0; i < index; i++) {
+            current = current.next;
+        }
+        current.data = data;
+    }
+
+    // Clear the linked list
+    public void clear() {
+        head = null;
+        size = 0;
     }
 
     // Check if the linked list contains a specific element
@@ -68,42 +110,23 @@ public class LinkedListDSA<T> implements Iterable<T>{
         return false;
     }
 
-    // Print all elements in the linked list
-    public void printList() {
+    // Check if the index is within bounds
+    private void checkIndex(int index) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+        }
+    }
+
+    // Override toString() method for better visualization of the linked list
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
         Node<T> current = head;
         while (current != null) {
-            System.out.println(current.data);
+            sb.append(current.data).append(" -> ");
             current = current.next;
         }
-    }
-
-    // // Clear all elements from the linked list
-    public void clear() {
-        head = null;
-    }
-
-    //
-    @Override
-    public Iterator<T> iterator() {
-        return new LinkedListIterator();
-    }
-
-    private class LinkedListIterator implements Iterator<T> {
-        private Node<T> current = head;
-
-        @Override
-        public boolean hasNext() {
-            return current != null;
-        }
-
-        @Override
-        public T next() {
-            if (!hasNext()) {
-                throw new NoSuchElementException();
-            }
-            T data = current.data;
-            current = current.next;
-            return data;
-        }
+        sb.append("null");
+        return sb.toString();
     }
 }
