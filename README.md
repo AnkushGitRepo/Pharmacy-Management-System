@@ -1,6 +1,6 @@
 # Pharmacy Store Management System
 
-The Pharmacy Store Management System is a console-based application designed to facilitate the efficient management of drug inventory and customer transactions in a pharmacy. The system allows an admin to perform various tasks, including managing drugs and customer records, processing sales, and generating invoices.
+The `Pharmacy Store Management System` is a `console-based` application designed to facilitate the efficient management of drug inventory and customer transactions in a pharmacy. The system allows an admin to perform various tasks, including managing drugs and customer records, processing sales, and generating invoices.
 
 ## Table of Contents
 
@@ -11,7 +11,7 @@ The Pharmacy Store Management System is a console-based application designed to 
 - [Usage Instructions](#usage-instructions)
 - [Conclusion](#conclusion)
 
-## Features
+!## Features
 
 - **Drug Management**: Add, update, delete, view, and list expired drugs.
 - **Customer Management**: Register, delete, and update customer information.
@@ -237,13 +237,13 @@ INSERT INTO Drugs (drug_id, drug_name, manufacturer, expiry_date, quantity, pric
 2. Ensure you have PostgreSQL installed and running.
 ## Setup
 1. Clone the repository
-2. Create the PostgreSQL database and tables using the provided schema.
+2. Create the `PostgreSQL database` and tables using the provided schema.
 3. Import the sample data into the database.
 4. Open the project in your preferred Java IDE.
-5. Update the database connection settings in the DatabaseHandler class if necessary.
+5. Update the database connection settings in the `DatabaseHandler` class if necessary.
 
 ## Running the Application
-1. Run the Main class.
+1. Run the `Main` class.
 2. Follow the on-screen instructions to manage drugs, customers, and orders.
 
 # Conclusion
