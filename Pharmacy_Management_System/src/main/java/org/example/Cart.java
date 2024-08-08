@@ -19,10 +19,6 @@ public class Cart {
         return cartId;
     }
 
-    public void setCartId(int cartId) {
-        this.cartId = cartId;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -33,10 +29,6 @@ public class Cart {
 
     public LinkedList<CartItem> getItems() {
         return items;
-    }
-
-    public void setItems(LinkedList<CartItem> items) {
-        this.items = items;
     }
 
     public void addToCart(CartItem item) {
