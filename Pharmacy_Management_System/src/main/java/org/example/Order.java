@@ -23,44 +23,12 @@ public class Order {
 
     // Getters and Setters
 
-    public int getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(int orderId) {
-        this.orderId = orderId;
-    }
-
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public Date getOrderDate() {
-        return orderDate;
-    }
-
-    public void setOrderDate(Date orderDate) {
-        this.orderDate = orderDate;
-    }
-
-    public double getTotalAmount() {
-        return totalAmount;
-    }
-
-    public void setTotalAmount(double totalAmount) {
-        this.totalAmount = totalAmount;
-    }
-
-    public LinkedList<CartItem> getItems() {
-        return items;
-    }
-
-    public void setItems(LinkedList<CartItem> items) {
-        this.items = items;
     }
 
     public void generateInvoice() {
@@ -84,9 +52,9 @@ public class Order {
                         item.getDrug().getPrice()));
             }
 
-            writer.write("\nTotal Amount: $" + totalAmount + "\n");
+            writer.write(String.format("\nTotal Amount: $%.2f\n", totalAmount));
 
-            System.out.println("Checkout Amount: $" + totalAmount);
+            System.out.println(String.format("Checkout Amount: $%.2f", totalAmount));
             System.out.println("Invoice generated: " + filePath);
 
         } catch (IOException e) {
