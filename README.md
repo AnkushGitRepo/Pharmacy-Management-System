@@ -16,8 +16,11 @@ The Pharmacy Store Management System is a console-based application designed to 
 - **Drug Management**: Add, update, delete, view, and list expired drugs.
 - **Customer Management**: Register, delete, and update customer information.
 - **Cart Management**: Add drugs to cart, view cart, and checkout.
-- **Help**: Get information about drugs using descriptions, tags, names, or IDs.
 - **Action Logging**: All user actions are stored in a stack data structure for review.
+- **Sales Report** Generates sales report between current and admin defined date.
+- **Alerts** Display all the expired and drugs having quantities less than 20.
+- **Help**: Get information about drugs using descriptions, tags, names, or IDs.
+
 
 ## System Requirements
 
