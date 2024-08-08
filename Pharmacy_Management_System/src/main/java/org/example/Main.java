@@ -157,15 +157,48 @@ public class Main {
 
     // Register a new customer
     private static void registerCustomer() {
-        System.out.print("Enter Customer Email: ");
-        scanner.nextLine();
-        String email = scanner.nextLine();
-        System.out.print("Enter Customer Name: ");
-        String name = scanner.nextLine();
+        String email = "";
+        String name = "";
+        String address = "";
+        String phoneNumber = "";
+
+        // Validate email
+        while (true) {
+            System.out.print("Enter Customer Email: ");
+            email = scanner.nextLine();
+            scanner.nextLine();
+            if (email.matches("^[\\w.%+-]+@[\\w.-]+\\.(com|in)$")) {
+                break;
+            } else {
+                System.out.println("Invalid email. Please enter a valid email ending with .com or .in [PRESS ENTER AND TRY AGAIN]");
+            }
+        }
+
+        // Validate name
+        while (true) {
+            System.out.print("Enter Customer Name: ");
+            name = scanner.nextLine();
+            if (isValidName(name)) {
+                break;
+            } else {
+                System.out.println("Invalid name. Name cannot contain numbers or special characters.");
+            }
+        }
+
+        // Address input (assuming no specific validation required for address)
         System.out.print("Enter Customer Address: ");
-        String address = scanner.nextLine();
-        System.out.print("Enter Customer Phone Number: ");
-        String phoneNumber = scanner.nextLine();
+        address = scanner.nextLine();
+
+        // Validate phone number
+        while (true) {
+            System.out.print("Enter Customer Phone Number: ");
+            phoneNumber = scanner.nextLine();
+            if (isValidPhoneNumber(phoneNumber)) {
+                break;
+            } else {
+                System.out.println("Invalid phone number. Phone number must contain only digits and be between 10 to 15 digits long.");
+            }
+        }
 
         Customer customer = new Customer(email, name, address, phoneNumber);
         customerList.add(customer);
@@ -186,12 +219,35 @@ public class Main {
             return;
         }
 
-        System.out.print("Enter new Customer Name: ");
-        String name = scanner.nextLine();
+        String name = "";
+        String address = "";
+        String phoneNumber = "";
+
+        // Validate name
+        while (true) {
+            System.out.print("Enter new Customer Name: ");
+            name = scanner.nextLine();
+            if (isValidName(name)) {
+                break;
+            } else {
+                System.out.println("Invalid name. Name cannot contain numbers or special characters.");
+            }
+        }
+
+        // Address input
         System.out.print("Enter new Customer Address: ");
-        String address = scanner.nextLine();
-        System.out.print("Enter new Customer Phone Number: ");
-        String phoneNumber = scanner.nextLine();
+        address = scanner.nextLine();
+
+        // Validate phone number
+        while (true) {
+            System.out.print("Enter new Customer Phone Number: ");
+            phoneNumber = scanner.nextLine();
+            if (isValidPhoneNumber(phoneNumber)) {
+                break;
+            } else {
+                System.out.println("Invalid phone number. Phone number must contain only digits and be between 10 to 15 digits long.");
+            }
+        }
 
         customer.setName(name);
         customer.setAddress(address);
@@ -224,34 +280,76 @@ public class Main {
     private static void addDrug() {
         System.out.print("Enter Drug ID: ");
         int drugId = getInputInt();
-        scanner.nextLine(); //Consume newLine
+        scanner.nextLine(); // Consume newLine
+
         System.out.print("Enter Drug Name: ");
         String drugName = scanner.nextLine();
+        while (drugName.isEmpty()) {
+            System.out.print("Drug Name cannot be empty. Enter Drug Name: ");
+            drugName = scanner.nextLine();
+        }
+
         System.out.print("Enter Manufacturer: ");
         String manufacturer = scanner.nextLine();
+        while (!manufacturer.matches("[a-zA-Z\\s]+")) {
+            System.out.print("Manufacturer cannot contain numbers. Enter Manufacturer: ");
+            manufacturer = scanner.nextLine();
+        }
+
         System.out.print("Enter Expiry Date (yyyy-MM-dd): ");
         String expiryDateStr = scanner.nextLine();
+        Date expiryDate = null;
+        while (true) {
+            try {
+                expiryDate = new SimpleDateFormat("yyyy-MM-dd").parse(expiryDateStr);
+                if (expiryDate.before(new Date())) {
+                    System.out.print("Expiry Date cannot be in the past. Enter Expiry Date (yyyy-MM-dd): ");
+                    expiryDateStr = scanner.nextLine();
+                } else {
+                    break;
+                }
+            } catch (ParseException e) {
+                System.out.print("Invalid date format. Enter Expiry Date (yyyy-MM-dd): ");
+                expiryDateStr = scanner.nextLine();
+            }
+        }
+
         System.out.print("Enter Quantity: ");
         int quantity = getInputInt();
+        while (quantity < 0) {
+            System.out.print("Quantity cannot be negative. Enter Quantity: ");
+            quantity = getInputInt();
+        }
+
         System.out.print("Enter Price: ");
         double price = getInputDouble();
+        while (price < 0) {
+            System.out.print("Price cannot be negative. Enter Price: ");
+            price = getInputDouble();
+        }
         scanner.nextLine(); // Consume newline
+
         System.out.print("Enter Description: ");
         String description = scanner.nextLine();
+        while (description.matches("[0-9]+")) {
+            System.out.print("Description cannot be full of numbers. Enter Description: ");
+            description = scanner.nextLine();
+        }
+
         System.out.print("Enter Tags: ");
         String tags = scanner.nextLine();
-
-        try {
-            Date expiryDate = new SimpleDateFormat("yyyy-MM-dd").parse(expiryDateStr);
-            Drug drug = new Drug(drugId, drugName, manufacturer, expiryDate, quantity, price, description, tags);
-            drugList.add(drug);
-            dbHandler.executeQuery("INSERT INTO Drugs (drug_id, drug_name, manufacturer, expiry_date, quantity, price, description, tags) VALUES (" + drugId + ", '" + drugName + "', '" + manufacturer + "', '" + expiryDateStr + "', " + quantity + ", " + price + ", '" + description + "', '" + tags + "')");
-            System.out.println("Drug added successfully!");
-            actionStack.push("Added drug with ID: " + drugId);
-        } catch (ParseException e) {
-            System.out.println("Invalid date format. Please try again.");
+        while (tags.matches("[0-9]+")) {
+            System.out.print("Tags cannot be full of numbers. Enter Tags: ");
+            tags = scanner.nextLine();
         }
+
+        Drug drug = new Drug(drugId, drugName, manufacturer, expiryDate, quantity, price, description, tags);
+        drugList.add(drug);
+        dbHandler.executeQuery("INSERT INTO Drugs (drug_id, drug_name, manufacturer, expiry_date, quantity, price, description, tags) VALUES (" + drugId + ", '" + drugName + "', '" + manufacturer + "', '" + expiryDateStr + "', " + quantity + ", " + price + ", '" + description + "', '" + tags + "')");
+        System.out.println("Drug added successfully!");
+        actionStack.push("Added drug with ID: " + drugId);
     }
+
 
     // Update an existing drug
     private static void updateDrug() {
@@ -270,13 +368,21 @@ public class Main {
         System.out.print("Enter new Drug Name [" + drug.getDrugName() + "]: ");
         String drugName = scanner.nextLine();
         if (!drugName.equalsIgnoreCase("none")) {
-            drug.setDrugName(drugName);
+            if (drugName.isEmpty()) {
+                System.out.println("Drug Name cannot be empty. Keeping the old name.");
+            } else {
+                drug.setDrugName(drugName);
+            }
         }
 
         System.out.print("Enter new Manufacturer [" + drug.getManufacturer() + "]: ");
         String manufacturer = scanner.nextLine();
         if (!manufacturer.equalsIgnoreCase("none")) {
-            drug.setManufacturer(manufacturer);
+            if (manufacturer.isEmpty()) {
+                System.out.println("Manufacturer cannot be empty. Keeping the old manufacturer.");
+            } else {
+                drug.setManufacturer(manufacturer);
+            }
         }
 
         System.out.print("Enter new Expiry Date (yyyy-MM-dd) [" + new SimpleDateFormat("yyyy-MM-dd").format(drug.getExpiryDate()) + "]: ");
@@ -284,7 +390,11 @@ public class Main {
         if (!expiryDateStr.equalsIgnoreCase("none")) {
             try {
                 Date expiryDate = new SimpleDateFormat("yyyy-MM-dd").parse(expiryDateStr);
-                drug.setExpiryDate(expiryDate);
+                if (expiryDate.before(new Date())) {
+                    System.out.println("Expiry Date cannot be in the past. Keeping the old expiry date.");
+                } else {
+                    drug.setExpiryDate(expiryDate);
+                }
             } catch (ParseException e) {
                 System.out.println("Invalid date format. Keeping the old date.");
             }
@@ -295,7 +405,11 @@ public class Main {
         if (!quantityStr.equalsIgnoreCase("none")) {
             try {
                 int quantity = Integer.parseInt(quantityStr);
-                drug.setQuantity(quantity);
+                if (quantity < 0) {
+                    System.out.println("Quantity cannot be negative. Keeping the old quantity.");
+                } else {
+                    drug.setQuantity(quantity);
+                }
             } catch (NumberFormatException e) {
                 System.out.println("Invalid quantity format. Keeping the old quantity.");
             }
@@ -306,7 +420,11 @@ public class Main {
         if (!priceStr.equalsIgnoreCase("none")) {
             try {
                 double price = Double.parseDouble(priceStr);
-                drug.setPrice(price);
+                if (price < 0) {
+                    System.out.println("Price cannot be negative. Keeping the old price.");
+                } else {
+                    drug.setPrice(price);
+                }
             } catch (NumberFormatException e) {
                 System.out.println("Invalid price format. Keeping the old price.");
             }
@@ -315,13 +433,21 @@ public class Main {
         System.out.print("Enter new Description [" + drug.getDescription() + "]: ");
         String description = scanner.nextLine();
         if (!description.equalsIgnoreCase("none")) {
-            drug.setDescription(description);
+            if (description.isEmpty()) {
+                System.out.println("Description cannot be empty. Keeping the old description.");
+            } else {
+                drug.setDescription(description);
+            }
         }
 
         System.out.print("Enter new Tags [" + drug.getTags() + "]: ");
         String tags = scanner.nextLine();
         if (!tags.equalsIgnoreCase("none")) {
-            drug.setTags(tags);
+            if (tags.isEmpty()) {
+                System.out.println("Tags cannot be empty. Keeping the old tags.");
+            } else {
+                drug.setTags(tags);
+            }
         }
 
         // Update the database with the new values
@@ -330,6 +456,7 @@ public class Main {
         System.out.println("Drug updated successfully!");
         actionStack.push("Updated drug with ID: " + drugId);
     }
+
 
     // Delete a drug
     private static void deleteDrug() {
@@ -357,7 +484,8 @@ public class Main {
         System.out.println("\n--- Drug Inventory ---");
         System.out.printf("%-10s %-20s %-15s %-10s %-10s\n", "Drug ID", "Drug Name", "Expiry Date", "Quantity", "Price");
 
-        for (Drug drug : drugList) {
+        for (int i = 0; i < drugList.size(); i++) {
+            Drug drug = drugList.get(i);
             System.out.printf("%-10d %-20s %-15s %-10d %-10.2f\n",
                     drug.getDrugId(),
                     drug.getDrugName(),
@@ -374,7 +502,8 @@ public class Main {
         System.out.printf("%-10s %-20s %-20s %-15s %-10s %-10s\n", "Drug ID", "Drug Name", "Manufacturer", "Expiry Date", "Quantity", "Price");
 
         Date currentDate = new Date();
-        for (Drug drug : drugList) {
+        for (int i = 0; i < drugList.size(); i++) {
+            Drug drug = drugList.get(i);
             if (drug.getExpiryDate().before(currentDate)) {
                 System.out.printf("%-10d %-20s %-20s %-15s %-10d %-10.2f\n",
                         drug.getDrugId(),
@@ -442,14 +571,14 @@ public class Main {
     }
 
     // Add a drug to the cart
-    // Add a drug to the cart
     private static void addDrugToCart(Cart cart) {
         System.out.println("\n--- Available Drugs ---");
         System.out.printf("%-10s %-20s", "Drug ID", "Drug Name");
 
         int count = 0;
 
-        for (Drug drug : drugList) {
+        for (int i = 0; i < drugList.size(); i++) {
+            Drug drug = drugList.get(i);
             if (!drug.getExpiryDate().before(new Date())) {
                 if (count % 5 == 0) {
                     System.out.println(); // Move to the next line after every 5 drugs
@@ -509,14 +638,13 @@ public class Main {
             actionStack.push("Added drug to cart: " + drug.getDrugId() + " with quantity: " + quantity);
         } catch (Exception e) {
             System.out.println("Error updating cart: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
-
     // Find drug by ID
     private static Drug findDrugById(int drugId) {
-        for (Drug drug : drugList) {
+        for (int i = 0; i < drugList.size(); i++) {
+            Drug drug = drugList.get(i);
             if (drug.getDrugId() == drugId) {
                 return drug;
             }
@@ -526,7 +654,8 @@ public class Main {
 
     // Find drug by name
     private static Drug findDrugByName(String drugName) {
-        for (Drug drug : drugList) {
+        for (int i = 0; i < drugList.size(); i++) {
+            Drug drug = drugList.get(i);
             if (drug.getDrugName().equalsIgnoreCase(drugName)) {
                 return drug;
             }
@@ -563,29 +692,48 @@ public class Main {
                 System.out.printf("%-10d %-20s %-10d %-10.2f\n", drugId, drugName, quantity, price);
             }
 
-            // Prompt for removing items from the cart
+            // Choice for removing items from the cart
             System.out.print("\nDo you want to remove any drug from the cart? (yes/no): ");
-            scanner.nextLine();
+            scanner.nextLine(); // Consume newline
             String response = scanner.nextLine();
 
             if (response.equalsIgnoreCase("yes")) {
                 System.out.print("Enter Drug ID to remove: ");
                 int drugIdToRemove = getInputInt();
 
+                // Get the quantity of the drug to be removed
+                String selectQuantityQuery = "SELECT quantity FROM Cart WHERE email='" + cart.getEmail() + "' AND drug_id=" + drugIdToRemove;
+                ResultSet quantityResultSet = dbHandler.executeSelectQuery(selectQuantityQuery);
+
+                int quantityToRemove = 0;
+                if (quantityResultSet.next()) {
+                    quantityToRemove = quantityResultSet.getInt("quantity");
+                }
+
                 // Remove the drug from the cart in the database
                 String deleteQuery = "DELETE FROM Cart WHERE email='" + cart.getEmail() + "' AND drug_id=" + drugIdToRemove;
                 dbHandler.executeQuery(deleteQuery);
 
-                System.out.println("Drug removed from cart successfully!");
+                // Update the drug quantity back in the drug table
+                String updateDrugQuantityQuery = "UPDATE Drugs SET quantity = quantity + " + quantityToRemove + " WHERE drug_id = " + drugIdToRemove;
+                dbHandler.executeQuery(updateDrugQuantityQuery);
+
+                System.out.println("Drug removed from cart successfully and quantity updated in inventory!");
                 actionStack.push("Removed drug from cart: " + drugIdToRemove);
             }
 
         } catch (SQLException e) {
             System.out.println("Error fetching cart data: " + e.getMessage());
-            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error closing ResultSet: " + e.getMessage());
+            }
         }
     }
-
 
     // Help method to provide drug information
     private static void help() {
@@ -641,7 +789,8 @@ public class Main {
         System.out.println("\n--- Low Stock Alerts (Quantity < 20) ---");
         System.out.printf("%-10s %-20s %-15s %-10s %-10s\n", "Drug ID", "Drug Name", "Manufacturer", "Quantity", "Price");
 
-        for (Drug drug : drugList) {
+        for (int i = 0; i < drugList.size(); i++) {
+            Drug drug = drugList.get(i);
             if (drug.getQuantity() < 20) {
                 System.out.printf("%-10d %-20s %-15s %-10d %-10.2f\n",
                         drug.getDrugId(),
@@ -656,7 +805,8 @@ public class Main {
         System.out.printf("%-10s %-20s %-15s %-10s %-10s\n", "Drug ID", "Drug Name", "Expiry Date", "Quantity", "Price");
 
         Date currentDate = new Date();
-        for (Drug drug : drugList) {
+        for (int i = 0; i < drugList.size(); i++) {
+            Drug drug = drugList.get(i);
             if (drug.getExpiryDate().before(currentDate)) {
                 System.out.printf("%-10d %-20s %-15s %-10d %-10.2f\n",
                         drug.getDrugId(),
@@ -668,7 +818,6 @@ public class Main {
         }
         actionStack.push("Viewed drug Alerts Information: ");
     }
-
 
     /**
      * Handles the checkout process for a customer's cart.
@@ -683,7 +832,8 @@ public class Main {
      *
      */
     private static void checkout(Cart cart) {
-        if (cart.getItems().isEmpty()) {
+        // Check if the cart is empty in the database
+        if (isCartEmptyInDatabase(cart.getEmail())) {
             System.out.println("Cart is empty. Cannot checkout.");
             return;
         }
@@ -707,8 +857,31 @@ public class Main {
             actionStack.push("Checked out cart with ID: " + cart.getCartId());
         } catch (Exception e) {
             System.out.println("Error during checkout: " + e.getMessage());
-            e.printStackTrace();
         }
+    }
+
+    private static boolean isCartEmptyInDatabase(String email) {
+        String query = "SELECT COUNT(*) AS item_count FROM Cart WHERE email = '" + email + "'";
+        ResultSet resultSet = dbHandler.executeSelectQuery(query);
+
+        try {
+            if (resultSet != null && resultSet.next()) {
+                int itemCount = resultSet.getInt("item_count");
+                return itemCount == 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error checking cart items: " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error closing ResultSet: " + e.getMessage());
+            }
+        }
+
+        return true; // Default to empty if there's an error
     }
 
     // Calculate total amount in the cart
@@ -726,7 +899,8 @@ public class Main {
 
     // Find customer by email
     private static Customer findCustomerByEmail(String email) {
-        for (Customer customer : customerList) {
+        for (int i = 0; i < customerList.size(); i++) {
+            Customer customer = customerList.get(i);
             if (customer.getEmail().equals(email)) {
                 return customer;
             }
@@ -736,7 +910,8 @@ public class Main {
 
     // Find cart by email
     private static Cart findCartByEmail(String email) {
-        for (Cart cart : cartList) {
+        for (int i = 0; i < cartList.size(); i++) {
+            Cart cart = cartList.get(i);
             if (cart.getEmail().equals(email)) {
                 return cart;
             }
@@ -746,7 +921,8 @@ public class Main {
 
     // Find drug by description or tag
     private static Drug findDrugByDescriptionOrTag(String input) {
-        for (Drug drug : drugList) {
+        for (int i = 0; i < drugList.size(); i++) {
+            Drug drug = drugList.get(i);
             if (drug.getDescription().toLowerCase().contains(input.toLowerCase()) || drug.getTags().toLowerCase().contains(input.toLowerCase())) {
                 return drug;
             }
@@ -767,7 +943,7 @@ public class Main {
         ResultSet resultSet = dbHandler.executeSelectQuery(query);
 
         try {
-            while (resultSet.next()) {
+            while (resultSet != null && resultSet.next()) {
                 int drugId = resultSet.getInt("drug_id");
                 String drugName = resultSet.getString("drug_name");
                 String manufacturer = resultSet.getString("manufacturer");
@@ -782,17 +958,24 @@ public class Main {
             }
             System.out.println("Initial drug data loaded successfully!");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Error loading drug data: " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error closing ResultSet: " + e.getMessage());
+            }
         }
     }
 
-    // Load customer data from the database
     private static void loadCustomerData() {
         String query = "SELECT * FROM Customers";
         ResultSet resultSet = dbHandler.executeSelectQuery(query);
 
         try {
-            while (resultSet.next()) {
+            while (resultSet != null && resultSet.next()) {
                 String email = resultSet.getString("email");
                 String name = resultSet.getString("name");
                 String address = resultSet.getString("address");
@@ -803,17 +986,24 @@ public class Main {
             }
             System.out.println("Initial customer data loaded successfully!");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Error loading customer data: " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error closing ResultSet: " + e.getMessage());
+            }
         }
     }
 
-    // Load cart data from the database
     private static void loadCartData() {
         String query = "SELECT * FROM Cart";
         ResultSet resultSet = dbHandler.executeSelectQuery(query);
 
         try {
-            while (resultSet.next()) {
+            while (resultSet != null && resultSet.next()) {
                 int cartId = resultSet.getInt("cart_id");
                 String email = resultSet.getString("email");
                 int drugId = resultSet.getInt("drug_id");
@@ -832,7 +1022,15 @@ public class Main {
             }
             System.out.println("Initial cart data loaded successfully!");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Error loading cart data: " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error closing ResultSet: " + e.getMessage());
+            }
         }
     }
 
@@ -858,5 +1056,35 @@ public class Main {
                 scanner.nextLine(); // Consume invalid input
             }
         }
+    }
+
+    private static boolean isValidEmail(String email) {
+        int atIndex = email.indexOf('@');
+        int dotIndex = email.lastIndexOf('.');
+        if (atIndex > 0 && dotIndex > atIndex && (email.endsWith(".com") || email.endsWith(".in"))) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isValidName(String name) {
+        for (char c : name.toCharArray()) {
+            if (!Character.isLetter(c) && !Character.isWhitespace(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isValidPhoneNumber(String phoneNumber) {
+        if (phoneNumber.length() >= 10 && phoneNumber.length() <= 15) {
+            for (char c : phoneNumber.toCharArray()) {
+                if (!Character.isDigit(c)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 }
