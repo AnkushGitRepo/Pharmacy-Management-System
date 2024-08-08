@@ -45,7 +45,7 @@ public class StackDSA {
         if (isEmpty()) {
             System.out.println("Stack is empty.");
         } else {
-            System.out.println("\nStack contents:");
+            System.out.println("\nAction Stack contents:");
             for (int i = top; i >= 0; i--) {
                 System.out.println(stackArray[i]);
             }
