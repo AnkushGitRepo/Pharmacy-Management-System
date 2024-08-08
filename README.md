@@ -37,7 +37,7 @@ The Pharmacy Store Management System is a console-based application designed to 
 
 1. **Clone the repository**:
     ```sh
-    git clone https://github.com/yourusername/pharmacy-store-management-system.git](https://github.com/AnkushGitRepo/Pharmacy-Management-System.git
+    git clone https://github.com/AnkushGitRepo/Pharmacy-Management-System.git
     ```
 
 2. **Navigate to the project directory**:
