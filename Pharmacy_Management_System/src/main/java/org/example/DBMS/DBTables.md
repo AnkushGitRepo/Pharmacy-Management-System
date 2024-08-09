@@ -1,3 +1,5 @@
+# Database Table and Triggers
+```sql
 CREATE TABLE Drugs (
     drug_id INT PRIMARY KEY CHECK (drug_id >= 1000 AND drug_id <= 9999),
     drug_name VARCHAR(255) NOT NULL,
@@ -100,3 +102,4 @@ CREATE TRIGGER trg_log_drug_changes
 AFTER UPDATE OR DELETE ON Drugs
 FOR EACH ROW
 EXECUTE FUNCTION log_drug_changes();
+```
