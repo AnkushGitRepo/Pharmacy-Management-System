@@ -11,7 +11,7 @@ The `Pharmacy Store Management System` is a `console-based` application designed
 - [Usage Instructions](#usage-instructions)
 - [Conclusion](#conclusion)
 
-!## Features
+## Features
 
 - **Drug Management**: Add, update, delete, view, and list expired drugs.
 - **Customer Management**: Register, delete, and update customer information.
