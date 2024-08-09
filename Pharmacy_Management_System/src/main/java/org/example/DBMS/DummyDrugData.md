@@ -1,3 +1,5 @@
+# Dummy Data for Drugs Table
+```sql
 -- Insert non-expired drugs with descriptions and tags
 INSERT INTO Drugs (drug_id, drug_name, manufacturer, expiry_date, quantity, price, description, tags) VALUES
 (1001, 'Aspirin', 'PharmaCorp', '2025-12-31', 100, 5.99, 'Pain reliever and anti-inflammatory', 'pain,fever,inflammation'),
@@ -32,3 +34,4 @@ INSERT INTO Drugs (drug_id, drug_name, manufacturer, expiry_date, quantity, pric
 (1030, 'Lorazepam', 'CalmMeds', '2025-11-20', 12, 9.80, 'Medication used to treat anxiety disorders', 'anxiety,calm');
 
 SELECT * FROM Drugs;
+```
