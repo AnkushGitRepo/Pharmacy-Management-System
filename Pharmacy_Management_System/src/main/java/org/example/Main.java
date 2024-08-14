@@ -157,42 +157,49 @@ public class Main {
 
     // Register a new customer
     private static void registerCustomer() {
-        String email = "";
-        String name = "";
-        String address = "";
-        String phoneNumber = "";
+        String email;
+        String name;
+        String address;
+        String phoneNumber;
 
-        // Validate email
+        // email
         while (true) {
             System.out.print("Enter Customer Email: ");
-            email = scanner.nextLine();
             scanner.nextLine();
-            if (email.matches("^[\\w.%+-]+@[\\w.-]+\\.(com|in)$")) {
+            email = scanner.nextLine().trim(); // Use trim to remove any leading or trailing whitespace
+            if (!email.isEmpty()){
                 break;
-            } else {
-                System.out.println("Invalid email. Please enter a valid email ending with .com or .in [PRESS ENTER AND TRY AGAIN]");
+            }else{
+                System.out.println("Email cannot be null");
             }
         }
 
         // Validate name
         while (true) {
             System.out.print("Enter Customer Name: ");
-            name = scanner.nextLine();
-            if (isValidName(name)) {
+            name = scanner.nextLine().trim();
+            if (name != null && isValidName(name) && !name.isEmpty()) {
                 break;
             } else {
-                System.out.println("Invalid name. Name cannot contain numbers or special characters.");
+                System.out.println("Invalid name. Name cannot be null, contain numbers, or special characters.");
             }
         }
 
-        // Address input (assuming no specific validation required for address)
-        System.out.print("Enter Customer Address: ");
-        address = scanner.nextLine();
+        // Validate address
+        while (true) {
+            System.out.print("Enter Customer Address: ");
+            address = scanner.nextLine().trim();
+            if (address != null && !address.isEmpty()) {
+                break;
+            } else {
+                System.out.println("Address cannot be null or empty.");
+            }
+        }
 
         // Validate phone number
         while (true) {
             System.out.print("Enter Customer Phone Number: ");
-            phoneNumber = scanner.nextLine();
+            phoneNumber = scanner.nextLine().trim();
             if (isValidPhoneNumber(phoneNumber)) {
                 break;
             } else {
@@ -206,6 +213,7 @@ public class Main {
         System.out.println("Customer registered successfully!");
         actionStack.push("Registered customer with email: " + email);
     }
+
 
     // Update customer information
     private static void updateCustomer() {
@@ -420,7 +428,7 @@ public class Main {
         if (!priceStr.equalsIgnoreCase("none")) {
             try {
                 double price = Double.parseDouble(priceStr);
-                if (price < 0) {
+                if (price <= 0) {
                     System.out.println("Price cannot be negative. Keeping the old price.");
                 } else {
                     drug.setPrice(price);
@@ -633,12 +641,15 @@ public class Main {
             dbHandler.executeQuery("UPDATE Drugs SET quantity = " + newQuantity + " WHERE drug_id = " + drug.getDrugId());
             // Update the drug quantity in the local list
             drug.setQuantity(newQuantity);
+            // Update the drug quantity in the LinkedList
+            updateDrugQuantityInList(drug.getDrugId(), -quantity, false);
 
             System.out.println("Drug added to cart successfully!");
             actionStack.push("Added drug to cart: " + drug.getDrugId() + " with quantity: " + quantity);
         } catch (Exception e) {
             System.out.println("Error updating cart: " + e.getMessage());
         }
+
     }
 
     // Find drug by ID
@@ -664,6 +675,7 @@ public class Main {
     }
 
     // View items in the cart
+    // View items in the cart
     private static void viewCart(Cart cart) {
         System.out.println("\n--- Cart Items ---");
 
@@ -683,43 +695,50 @@ public class Main {
 
             System.out.printf("%-10s %-20s %-10s %-10s\n", "Drug ID", "Drug Name", "Quantity", "Price");
 
+            // To keep track of drugs in the cart
+            HashMap<Integer, Integer> cartDrugIds = new HashMap<>();
+
             while (resultSet.next()) {
                 int drugId = resultSet.getInt("drug_id");
                 String drugName = resultSet.getString("drug_name");
                 int quantity = resultSet.getInt("quantity");
                 double price = resultSet.getDouble("price");
 
+                cartDrugIds.put(drugId, quantity);  // Track drugs in the cart
+
                 System.out.printf("%-10d %-20s %-10d %-10.2f\n", drugId, drugName, quantity, price);
             }
 
             // Choice for removing items from the cart
             System.out.print("\nDo you want to remove any drug from the cart? (yes/no): ");
-            scanner.nextLine(); // Consume newline
+            scanner.nextLine();
             String response = scanner.nextLine();
 
             if (response.equalsIgnoreCase("yes")) {
                 System.out.print("Enter Drug ID to remove: ");
                 int drugIdToRemove = getInputInt();
 
-                // Get the quantity of the drug to be removed
-                String selectQuantityQuery = "SELECT quantity FROM Cart WHERE email='" + cart.getEmail() + "' AND drug_id=" + drugIdToRemove;
-                ResultSet quantityResultSet = dbHandler.executeSelectQuery(selectQuantityQuery);
+                // Check if the drug ID is in the user's cart
+                if (cartDrugIds.containsKey(drugIdToRemove)) {
+                    int quantityToRemove = cartDrugIds.get(drugIdToRemove);
 
-                int quantityToRemove = 0;
-                if (quantityResultSet.next()) {
-                    quantityToRemove = quantityResultSet.getInt("quantity");
+                    // Remove the drug from the cart in the database
+                    String deleteQuery = "DELETE FROM Cart WHERE email='" + cart.getEmail() + "' AND drug_id=" + drugIdToRemove;
+                    dbHandler.executeQuery(deleteQuery);
+
+                    // Update the drug quantity back in the drug table
+                    String updateDrugQuantityQuery = "UPDATE Drugs SET quantity = quantity + " + quantityToRemove + " WHERE drug_id = " + drugIdToRemove;
+                    dbHandler.executeQuery(updateDrugQuantityQuery);
+
+                    // Update the drug quantity in the LinkedList
+                    updateDrugQuantityInList(drugIdToRemove, quantityToRemove, true);
+                    
+                    System.out.println("Drug removed from cart successfully and quantity updated in inventory!");
+                    actionStack.push("Removed drug from cart: " + drugIdToRemove);
+
+                } else {
+                    System.out.println("Error: Drug ID " + drugIdToRemove + " is not in your cart.");
                 }
-
-                // Remove the drug from the cart in the database
-                String deleteQuery = "DELETE FROM Cart WHERE email='" + cart.getEmail() + "' AND drug_id=" + drugIdToRemove;
-                dbHandler.executeQuery(deleteQuery);
-
-                // Update the drug quantity back in the drug table
-                String updateDrugQuantityQuery = "UPDATE Drugs SET quantity = quantity + " + quantityToRemove + " WHERE drug_id = " + drugIdToRemove;
-                dbHandler.executeQuery(updateDrugQuantityQuery);
-
-                System.out.println("Drug removed from cart successfully and quantity updated in inventory!");
-                actionStack.push("Removed drug from cart: " + drugIdToRemove);
             }
 
         } catch (SQLException e) {
@@ -734,6 +753,7 @@ public class Main {
             }
         }
     }
+
 
     // Help method to provide drug information
     private static void help() {
@@ -930,6 +950,21 @@ public class Main {
         return null;
     }
 
+    private static void updateDrugQuantityInList(int drugId, int quantityChange, boolean isAddingBack) {
+        for (int i = 0; i < drugList.size(); i++) {
+            Drug drug = drugList.get(i);
+            if (drug.getDrugId() == drugId) {
+                if (isAddingBack) {
+                    drug.setQuantity(drug.getQuantity() + quantityChange); // Add back the quantity
+                } else {
+                    drug.setQuantity(drug.getQuantity() - quantityChange); // Subtract the quantity
+                }
+                return;
+            }
+        }
+    }
+
+
     // Load initial data from the database
     private static void loadInitialData() {
         loadDrugData();
@@ -1058,16 +1093,11 @@ public class Main {
         }
     }
 
-    private static boolean isValidEmail(String email) {
-        int atIndex = email.indexOf('@');
-        int dotIndex = email.lastIndexOf('.');
-        if (atIndex > 0 && dotIndex > atIndex && (email.endsWith(".com") || email.endsWith(".in"))) {
-            return true;
-        }
-        return false;
-    }
-
     private static boolean isValidName(String name) {
+        if (name == null) {
+            System.out.println("ERROR: Name cannot be null");
+            return false;
+        }
         for (char c : name.toCharArray()) {
             if (!Character.isLetter(c) && !Character.isWhitespace(c)) {
                 return false;
