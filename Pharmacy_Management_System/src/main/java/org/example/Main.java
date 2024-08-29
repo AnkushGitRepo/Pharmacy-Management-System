@@ -1,7 +1,6 @@
 package org.example;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.*;
 import java.sql.*;
 import java.util.Date;
@@ -156,7 +155,8 @@ public class Main {
     }
 
     // Register a new customer
-    private static void registerCustomer() {
+    private static void
+    registerCustomer() {
         String email;
         String name;
         String address;
@@ -167,9 +167,13 @@ public class Main {
             System.out.print("Enter Customer Email: ");
             scanner.nextLine();
             email = scanner.nextLine().trim(); // Use trim to remove any leading or trailing whitespace
-            if (!email.isEmpty()){
+            if (!email.isEmpty()) {
+                if (isEmailExists(email)) {
+                    System.out.println("Email already exists in the database. Aborting registration.");
+                    return; // Abort registration
+                }
                 break;
-            }else{
+            } else {
                 System.out.println("Email cannot be null");
             }
         }
@@ -286,8 +290,9 @@ public class Main {
 
     // Add a new drug
     private static void addDrug() {
-        System.out.print("Enter Drug ID: ");
-        int drugId = getInputInt();
+        // Fetch the maximum drug_id from the database and increment it
+        int drugId = getNextDrugId();
+        System.out.println("New Generated Drug ID: "+drugId);
         scanner.nextLine(); // Consume newLine
 
         System.out.print("Enter Drug Name: ");
@@ -300,7 +305,7 @@ public class Main {
         System.out.print("Enter Manufacturer: ");
         String manufacturer = scanner.nextLine();
         while (!manufacturer.matches("[a-zA-Z\\s]+")) {
-            System.out.print("Manufacturer cannot contain numbers. Enter Manufacturer: ");
+            System.out.print("Manufacturer cannot be null or number . Enter Manufacturer: ");
             manufacturer = scanner.nextLine();
         }
 
@@ -393,7 +398,7 @@ public class Main {
             }
         }
 
-        System.out.print("Enter new Expiry Date (yyyy-MM-dd) [" + new SimpleDateFormat("yyyy-MM-dd").format(drug.getExpiryDate()) + "]: ");
+        System.out.print("Enter new Expiry Date (yyyy-MM-dd) [" + drug.getExpiryDate() + "]: ");
         String expiryDateStr = scanner.nextLine();
         if (!expiryDateStr.equalsIgnoreCase("none")) {
             try {
@@ -494,12 +499,7 @@ public class Main {
 
         for (int i = 0; i < drugList.size(); i++) {
             Drug drug = drugList.get(i);
-            System.out.printf("%-10d %-20s %-15s %-10d %-10.2f\n",
-                    drug.getDrugId(),
-                    drug.getDrugName(),
-                    new SimpleDateFormat("yyyy-MM-dd").format(drug.getExpiryDate()),
-                    drug.getQuantity(),
-                    drug.getPrice());
+            System.out.printf("%-10d %-20s %-15s %-10d %-10.2f\n", drug.getDrugId(), drug.getDrugName(), new SimpleDateFormat("dd-MM-yyyy").format(drug.getExpiryDate()), drug.getQuantity(), drug.getPrice());
         }
         actionStack.push("Viewed drug inventory");
     }
@@ -513,13 +513,7 @@ public class Main {
         for (int i = 0; i < drugList.size(); i++) {
             Drug drug = drugList.get(i);
             if (drug.getExpiryDate().before(currentDate)) {
-                System.out.printf("%-10d %-20s %-20s %-15s %-10d %-10.2f\n",
-                        drug.getDrugId(),
-                        drug.getDrugName(),
-                        drug.getManufacturer(),
-                        new SimpleDateFormat("yyyy-MM-dd").format(drug.getExpiryDate()),
-                        drug.getQuantity(),
-                        drug.getPrice());
+                System.out.printf("%-10d %-20s %-20s %-15s %-10d %-10.2f\n", drug.getDrugId(), drug.getDrugName(), drug.getManufacturer(), new SimpleDateFormat("dd-MM-yyyy").format(drug.getExpiryDate()), drug.getQuantity(), drug.getPrice());
             }
         }
         actionStack.push("Listed expired drugs");
@@ -675,15 +669,11 @@ public class Main {
     }
 
     // View items in the cart
-    // View items in the cart
     private static void viewCart(Cart cart) {
         System.out.println("\n--- Cart Items ---");
 
         // Query to fetch cart items from the database
-        String query = "SELECT c.drug_id, d.drug_name, d.price, c.quantity " +
-                "FROM Cart c " +
-                "JOIN Drugs d ON c.drug_id = d.drug_id " +
-                "WHERE c.email = '" + cart.getEmail() + "'";
+        String query = "SELECT c.drug_id, d.drug_name, d.price, c.quantity " + "FROM Cart c " + "JOIN Drugs d ON c.drug_id = d.drug_id " + "WHERE c.email = '" + cart.getEmail() + "'";
 
         ResultSet resultSet = dbHandler.executeSelectQuery(query);
 
@@ -732,7 +722,7 @@ public class Main {
 
                     // Update the drug quantity in the LinkedList
                     updateDrugQuantityInList(drugIdToRemove, quantityToRemove, true);
-                    
+
                     System.out.println("Drug removed from cart successfully and quantity updated in inventory!");
                     actionStack.push("Removed drug from cart: " + drugIdToRemove);
 
@@ -778,7 +768,7 @@ public class Main {
             System.out.println("ID: " + drug.getDrugId());
             System.out.println("Name: " + drug.getDrugName());
             System.out.println("Manufacturer: " + drug.getManufacturer());
-            System.out.println("Expiry Date: " + new SimpleDateFormat("yyyy-MM-dd").format(drug.getExpiryDate()));
+            System.out.println("Expiry Date: " + new SimpleDateFormat("dd-MM-yyyy").format(drug.getExpiryDate()));
             System.out.println("Quantity: " + drug.getQuantity());
             System.out.println("Price: " + drug.getPrice());
             System.out.println("Description: " + drug.getDescription());
@@ -831,7 +821,7 @@ public class Main {
                 System.out.printf("%-10d %-20s %-15s %-10d %-10.2f\n",
                         drug.getDrugId(),
                         drug.getDrugName(),
-                        new SimpleDateFormat("yyyy-MM-dd").format(drug.getExpiryDate()),
+                        new SimpleDateFormat("dd-MM-yyyy").format(drug.getExpiryDate()),
                         drug.getQuantity(),
                         drug.getPrice());
             }
@@ -839,17 +829,17 @@ public class Main {
         actionStack.push("Viewed drug Alerts Information: ");
     }
 
-    /**
-     * Handles the checkout process for a customer's cart.
-     *
-     * This method finalizes the purchase for the items in the customer's cart. It performs the following steps:
-     * 1. Validates that the cart is not empty.
-     * 2. Calculates the total amount for the items in the cart.
-     * 3. Creates an Order object and saves the order details in the database.
-     * 4. Generates an invoice for the order.
-     * 5. Clears the cart and updates the drug quantities in the database.
-     * 6. Logs the action to the action stack.
-     *
+    /*
+      Handles the checkout process for a customer's cart.
+
+      This method finalizes the purchase for the items in the customer's cart. It performs the following steps:
+      1. Validates that the cart is not empty.
+      2. Calculates the total amount for the items in the cart.
+      3. Creates an Order object and saves the order details in the database.
+      4. Generates an invoice for the order.
+      5. Clears the cart and updates the drug quantities in the database.
+      6. Logs the action to the action stack.
+
      */
     private static void checkout(Cart cart) {
         // Check if the cart is empty in the database
@@ -907,7 +897,9 @@ public class Main {
     // Calculate total amount in the cart
     private static double calculateTotalAmount(Cart cart) {
         double totalAmount = 0;
-        for (CartItem item : cart.getItems()) {
+        LinkedListDSA<CartItem> items = cart.getItems();
+        for (int i = 0; i < items.size(); i++) {
+            CartItem item = items.get(i);
             if (item.getDrug() != null && item.getQuantity() > 0) {
                 totalAmount += item.getQuantity() * item.getDrug().getPrice();
             } else {
@@ -916,6 +908,7 @@ public class Main {
         }
         return totalAmount;
     }
+
 
     // Find customer by email
     private static Customer findCustomerByEmail(String email) {
@@ -1116,5 +1109,48 @@ public class Main {
             return true;
         }
         return false;
+    }
+
+    private static boolean isEmailExists(String email) {
+        String query = "SELECT COUNT(*) FROM Customers WHERE email = '" + email + "'";
+        ResultSet rs = dbHandler.executeSelectQuery(query);
+        try {
+            if (rs != null && rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error checking email existence: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error closing ResultSet: " + e.getMessage());
+            }
+        }
+        return false;
+    }
+
+    // Method to get the next drug ID
+    private static int getNextDrugId() {
+        String query = "SELECT COALESCE(MAX(drug_id), 999) + 1 FROM Drugs"; // drug_id starts from 1000
+        ResultSet rs = dbHandler.executeSelectQuery(query);
+        try {
+            if (rs != null && rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error fetching next drug ID: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error closing ResultSet: " + e.getMessage());
+            }
+        }
+        return 1000; // Return 1000 if something goes wrong, assuming it’s the starting ID
     }
 }
