@@ -5,12 +5,12 @@ import java.util.LinkedList;
 public class Cart {
     private int cartId;
     private String email;
-    private LinkedList<CartItem> items;
+    private LinkedListDSA<CartItem> items;
 
     public Cart(int cartId, String email) {
         this.cartId = cartId;
         this.email = email;
-        this.items = new LinkedList<>();
+        this.items = new LinkedListDSA<>();
     }
 
     // Getters and Setters
@@ -27,7 +27,7 @@ public class Cart {
         this.email = email;
     }
 
-    public LinkedList<CartItem> getItems() {
+    public LinkedListDSA<CartItem> getItems() {
         return items;
     }
 
