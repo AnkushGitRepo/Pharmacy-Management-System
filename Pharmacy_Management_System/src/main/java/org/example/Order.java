@@ -4,21 +4,20 @@ import java.io.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.*;
 
 public class Order {
     private int orderId;
     private String email;
     private Date orderDate;
     private double totalAmount;
-    private LinkedList<CartItem> items;
+    private LinkedListDSA<CartItem> items;
 
-    public Order(int orderId, String email, Date orderDate, double totalAmount, LinkedList<CartItem> items) {
+    public Order(int orderId, String email, Date orderDate, double totalAmount, LinkedListDSA<CartItem> items) {
         this.orderId = orderId;
         this.email = email;
         this.orderDate = orderDate;
         this.totalAmount = totalAmount;
-        this.items = items != null ? items : new LinkedList<>();
+        this.items = items != null ? items : new LinkedListDSA<>();
     }
 
     // Getters and Setters
@@ -43,7 +42,9 @@ public class Order {
             writer.write("Order Date: " + sdf.format(orderDate) + "\n\n");
 
             writer.write(String.format("%-10s %-20s %-15s %-10s %-10s\n", "Drug ID", "Drug Name", "Manufacturer", "Quantity", "Price"));
-            for (CartItem item : items) {
+
+            for (int i = 0; i < items.size(); i++) {
+                CartItem item = items.get(i);
                 writer.write(String.format("%-10d %-20s %-15s %-10d %-10.2f\n",
                         item.getDrug().getDrugId(),
                         item.getDrug().getDrugName(),
@@ -62,19 +63,20 @@ public class Order {
         }
     }
 
-    /**
-     * Saves the order details and associated items to the database.
-     *
-     * This method performs the following steps:
-     * 1. Establishes a connection to the database.
-     * 2. Retrieves the current maximum order ID from the Orders table to determine the next order ID.
-     * 3. Inserts the order details into the Orders table.
-     * 4. Inserts each item in the order into the OrderItems table.
-     * 5. Updates the quantity of each drug in the Drugs table to reflect the purchase.
-     * 6. Commits the transaction to ensure all changes are saved.
-     * 7. Rolls back the transaction in case of any error to maintain data integrity.
-     *
-     * Throws SQLException If there is an error while interacting with the database.
+
+    /*
+      Saves the order details and associated items to the database.
+
+      This method performs the following steps:
+      1. Establishes a connection to the database.
+      2. Retrieves the current maximum order ID from the Orders table to determine the next order ID.
+      3. Inserts the order details into the Orders table.
+      4. Inserts each item in the order into the OrderItems table.
+      5. Updates the quantity of each drug in the Drugs table to reflect the purchase.
+      6. Commits the transaction to ensure all changes are saved.
+      7. Rolls back the transaction in case of any error to maintain data integrity.
+
+     Throws SQLException If there is an error while interacting with the database.
      */
     public void saveOrder() throws SQLException {
         Connection connection = null;
@@ -107,7 +109,8 @@ public class Order {
             orderStatement.executeUpdate();
 
             // Insert each cart item into OrderItems table and update drug quantities
-            for (CartItem item : items) {
+            for (int i = 0; i < items.size(); i++) {
+                CartItem item = items.get(i);
                 itemStatement = connection.prepareStatement(insertOrderItemSQL);
                 itemStatement.setInt(1, orderId);
                 itemStatement.setInt(2, item.getDrug().getDrugId());
