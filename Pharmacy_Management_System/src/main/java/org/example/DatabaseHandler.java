@@ -1,7 +1,6 @@
 package org.example;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 
@@ -21,6 +20,7 @@ public class DatabaseHandler {
         }
     }
 
+    // Return Nothing [Only Use for Insert, Update, Delete]
     public void executeQuery(String query) {
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(query);
@@ -29,6 +29,7 @@ public class DatabaseHandler {
         }
     }
 
+    // Return ResultSet [Only Use with Select Query]
     public ResultSet executeSelectQuery(String query) {
         try {
             Statement statement = connection.createStatement();
